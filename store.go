@@ -195,9 +195,9 @@ func (s *FilesystemStore) save(session *Session) error {
 	filename := s.path + "session_" + session.ID
 	fileMutex.Lock()
 	defer fileMutex.Unlock()
-	fp, err2 := os.OpenFile(filename, os.O_WRONLY|os.O_CREATE, 0600)
-	if err2 != nil {
-		return err2
+	fp, err := os.OpenFile(filename, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0600)
+	if err != nil {
+		return err
 	}
 	if _, err = fp.Write([]byte(encoded)); err != nil {
 		return err
