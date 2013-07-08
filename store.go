@@ -73,7 +73,8 @@ func (s *CookieStore) Get(r *http.Request, name string) (*Session, error) {
 // decoded session after the first call.
 func (s *CookieStore) New(r *http.Request, name string) (*Session, error) {
 	session := NewSession(s, name)
-	session.Options = &(*s.Options)
+	opts := *s.Options
+	session.Options = &opts
 	session.IsNew = true
 	var err error
 	if c, errCookie := r.Cookie(name); errCookie == nil {
@@ -148,7 +149,8 @@ func (s *FilesystemStore) Get(r *http.Request, name string) (*Session, error) {
 // See CookieStore.New().
 func (s *FilesystemStore) New(r *http.Request, name string) (*Session, error) {
 	session := NewSession(s, name)
-	session.Options = &(*s.Options)
+	opts := *s.Options
+	session.Options = &opts
 	session.IsNew = true
 	var err error
 	if c, errCookie := r.Cookie(name); errCookie == nil {
