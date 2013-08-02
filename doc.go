@@ -45,6 +45,9 @@ store.Get() to retrieve an existing session or a new one. Then we set some
 session values in session.Values, which is a map[interface{}]interface{}.
 And finally we call session.Save() to save the session in the response.
 
+Note that in production code, we should check for errors when calling
+session.Save(r, w), and either display an error message or otherwise handle it.
+
 That's all you need to know for the basic usage. Let's take a look at other
 options, starting with flash messages.
 
@@ -70,6 +73,36 @@ flashes, call session.Flashes(). Here is an example:
 
 Flash messages are useful to set information to be read after a redirection,
 like after form submissions.
+
+There may also be cases where you want to store a complex datatype within a
+session, such as a struct. Sessions are serialised using the encoding/gob package,
+so it is easy to register new datatypes for storage in sessions:
+
+	import(
+		"encoding/gob"
+		"github.com/gorilla/sessions"
+	)
+
+	type Person struct {
+		FirstName	string
+		LastName 	string
+		Email		string
+		Age			int
+	}
+
+	type M map[string]interface{}
+
+	func init() {
+
+		gob.Register(&Person{})
+		gob.Register(&M{})
+	}
+
+As it's not possible to pass a raw type as a parameter to a function, gob.Register()
+relies on us passing it an empty pointer to the type as a parameter. In the example
+above we've passed it a pointer to a struct and a pointer to a custom type
+representing a map[string]interface. This will then allow us to serialise/deserialise
+values of those types to and from our sessions.
 
 By default, session cookies last for a month. This is probably too long for
 some cases, but it is easy to change this and other attributes during
