@@ -137,6 +137,17 @@ type FilesystemStore struct {
 	path    string
 }
 
+// MaxLength restricts the maximum length of new sessions to l.
+// If l is 0 there is no limit to the size of a session, use with caution.
+// The default for a new FilesystemStore is 4096.
+func (s *FilesystemStore) MaxLength(l int) {
+	for _, c := range s.Codecs {
+		if codec, ok := c.(*securecookie.SecureCookie); ok {
+			codec.MaxLength(l)
+		}
+	}
+}
+
 // Get returns a session for the given name after adding it to the registry.
 //
 // See CookieStore.Get().
