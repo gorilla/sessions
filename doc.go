@@ -115,7 +115,8 @@ maximum age of a session to one week:
 	session.Options = &sessions.Options{
 		Path:     "/",
 		MaxAge:   86400 * 7,
-		HttpOnly: true}
+		HttpOnly: true,
+	}
 
 Sometimes we may want to change authentication and/or encryption keys without
 breaking existing sessions. The CookieStore supports key rotation, and to use
