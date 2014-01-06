@@ -113,8 +113,9 @@ fields are basically a subset of http.Cookie fields. Let's change the
 maximum age of a session to one week:
 
 	session.Options = &sessions.Options{
-		Path:   "/",
-		MaxAge: 86400 * 7,
+		Path:     "/",
+		MaxAge:   86400 * 7,
+		HttpOnly: true,
 	}
 
 Sometimes we may want to change authentication and/or encryption keys without
