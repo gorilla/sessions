@@ -6,7 +6,8 @@ Store Implementations
 Other implementations of the sessions.Store interface:
 
  * [github.com/srinathgs/couchbasestore](https://github.com/srinathgs/couchbasestore) - Couchbase
- * [github.com/hnakamur/gaesessions](https://github.com/hnakamur/gaesessions) - Memcache or GAE
+ * [github.com/bradleypeabody/gorilla-sessions-memcache](https://github.com/bradleypeabody/gorilla-sessions-memcache) - Memcache
+ * [github.com/hnakamur/gaesessions](https://github.com/hnakamur/gaesessions) - Memcache on GAE
  * [github.com/kidstuff/mongostore](https://github.com/kidstuff/mongostore) - MongoDB
  * [github.com/srinathgs/mysqlstore](https://github.com/srinathgs/mysqlstore) - MySQL
  * [github.com/antonlindstrom/pgstore](https://github.com/antonlindstrom/pgstore) - PostgreSQL
