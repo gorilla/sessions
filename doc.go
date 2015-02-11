@@ -56,6 +56,9 @@ is to wrap the top-level mux when calling http.ListenAndServe:
 
 The ClearHandler function is provided by the gorilla/context package.
 
+Also: Call Save before writing to the response, otherwise the session
+cookie will not be sent to the client.
+
 That's all you need to know for the basic usage. Let's take a look at other
 options, starting with flash messages.
 
@@ -69,12 +72,10 @@ flashes, call session.Flashes(). Here is an example:
 		session, _ := store.Get(r, "session-name")
 		// Get the previously flashes, if any.
 		if flashes := session.Flashes(); len(flashes) > 0 {
-			// Just print the flash values.
-			fmt.Fprint(w, "%v", flashes)
+			// Use the flash values.
 		} else {
 			// Set a new flash.
 			session.AddFlash("Hello, flash messages world!")
-			fmt.Fprint(w, "No flashes found.")
 		}
 		session.Save(r, w)
 	}
