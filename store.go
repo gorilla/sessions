@@ -222,10 +222,10 @@ func (s *FilesystemStore) save(session *Session) error {
 	if err != nil {
 		return err
 	}
+	defer fp.Close()
 	if _, err = fp.Write([]byte(encoded)); err != nil {
 		return err
 	}
-	fp.Close()
 	return nil
 }
 
