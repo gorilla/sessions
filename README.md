@@ -15,3 +15,4 @@ Other implementations of the sessions.Store interface:
  * [github.com/antonlindstrom/pgstore](https://github.com/antonlindstrom/pgstore) - PostgreSQL
  * [github.com/boj/redistore](https://github.com/boj/redistore) - Redis
  * [github.com/boj/riakstore](https://github.com/boj/riakstore) - Riak
+ * [github.com/michaeljs1990/sqlitestore](https://github.com/michaeljs1990/sqlitestore) - SQLite
