@@ -224,6 +224,8 @@ func (s *FilesystemStore) save(session *Session) error {
 // load reads a file and decodes its content into session.Values.
 func (s *FilesystemStore) load(session *Session) error {
 	filename := s.path + "session_" + session.ID
+	fileMutex.RLock()
+	defer fileMutex.RUnlock()
 	fdata, err := ioutil.ReadFile(filename)
 	if err != nil {
 		return err
