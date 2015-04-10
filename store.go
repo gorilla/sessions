@@ -9,6 +9,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"path/filepath"
 	"strings"
 	"sync"
 
@@ -123,9 +124,6 @@ func NewFilesystemStore(path string, keyPairs ...[]byte) *FilesystemStore {
 	if path == "" {
 		path = os.TempDir()
 	}
-	if path[len(path)-1] != '/' {
-		path += "/"
-	}
 	return &FilesystemStore{
 		Codecs: securecookie.CodecsFromPairs(keyPairs...),
 		Options: &Options{
@@ -215,7 +213,7 @@ func (s *FilesystemStore) save(session *Session) error {
 	if err != nil {
 		return err
 	}
-	filename := s.path + "session_" + session.ID
+	filename := filepath.Join(s.path, "session_"+session.ID)
 	fileMutex.Lock()
 	defer fileMutex.Unlock()
 	return ioutil.WriteFile(filename, []byte(encoded), 0600)
@@ -223,7 +221,7 @@ func (s *FilesystemStore) save(session *Session) error {
 
 // load reads a file and decodes its content into session.Values.
 func (s *FilesystemStore) load(session *Session) error {
-	filename := s.path + "session_" + session.ID
+	filename := filepath.Join(s.path, "session_"+session.ID)
 	fileMutex.RLock()
 	defer fileMutex.RUnlock()
 	fdata, err := ioutil.ReadFile(filename)
