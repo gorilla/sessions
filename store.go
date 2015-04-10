@@ -6,10 +6,10 @@ package sessions
 
 import (
 	"encoding/base32"
-	"filepath"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"os"
+	"path/filepath"
 	"strings"
 	"sync"
 
