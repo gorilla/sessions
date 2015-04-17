@@ -5,6 +5,7 @@ Store Implementations
 ---------------------
 Other implementations of the sessions.Store interface:
 
+ * [github.com/starJammer/gorilla-sessions-arangodb](https://github.com/starJammer/gorilla-sessions-arangodb) - ArangoDB
  * [github.com/yosssi/boltstore](https://github.com/yosssi/boltstore) - Bolt
  * [github.com/srinathgs/couchbasestore](https://github.com/srinathgs/couchbasestore) - Couchbase
  * [github.com/denizeren/dynamostore](https://github.com/denizeren/dynamostore) - Dynamodb on AWS
