@@ -35,7 +35,7 @@ Let's start with an example that shows the sessions API in a nutshell:
 		// Set some session values.
 		session.Values["foo"] = "bar"
 		session.Values[42] = 43
-		// Save it.
+		// Save it before we write to the response/return from the handler.
 		session.Save(r, w)
 	}
 ```
