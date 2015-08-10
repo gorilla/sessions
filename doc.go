@@ -53,6 +53,9 @@ And finally we call session.Save() to save the session in the response.
 Note that in production code, we should check for errors when calling
 session.Save(r, w), and either display an error message or otherwise handle it.
 
+Save must be called before writing to the response, otherwise the session
+cookie will not be sent to the client.
+
 Important Note: If you aren't using gorilla/mux, you need to wrap your handlers
 with context.ClearHandler as or else you will leak memory! An easy way to do this
 is to wrap the top-level mux when calling http.ListenAndServe:
@@ -79,12 +82,10 @@ flashes, call session.Flashes(). Here is an example:
 
 		// Get the previously flashes, if any.
 		if flashes := session.Flashes(); len(flashes) > 0 {
-			// Just print the flash values.
-			fmt.Fprint(w, "%v", flashes)
+			// Use the flash values.
 		} else {
 			// Set a new flash.
 			session.AddFlash("Hello, flash messages world!")
-			fmt.Fprint(w, "No flashes found.")
 		}
 		session.Save(r, w)
 	}
