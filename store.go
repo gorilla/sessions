@@ -114,7 +114,7 @@ func (s *CookieStore) Save(r *http.Request, w http.ResponseWriter,
 }
 
 // MaxAge sets the maximum age for the store and the underlying cookie
-// implementation.  Individual sessions can be deleted by setting Options.MaxAge
+// implementation. Individual sessions can be deleted by setting Options.MaxAge
 // = -1 for that session.
 func (s *CookieStore) MaxAge(age int) {
 	s.Options.MaxAge = age
@@ -227,7 +227,7 @@ func (s *FilesystemStore) Save(r *http.Request, w http.ResponseWriter,
 }
 
 // MaxAge sets the maximum age for the store and the underlying cookie
-// implementation.  Individual sessions can be deleted by setting Options.MaxAge
+// implementation. Individual sessions can be deleted by setting Options.MaxAge
 // = -1 for that session.
 func (s *FilesystemStore) MaxAge(age int) {
 	s.Options.MaxAge = age
