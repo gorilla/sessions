@@ -29,13 +29,9 @@ Let's start with an example that shows the sessions API in a nutshell:
 	var store = sessions.NewCookieStore([]byte("something-very-secret"))
 
 	func MyHandler(w http.ResponseWriter, r *http.Request) {
-		// Get a session. We're ignoring the error resulted from decoding an
+		// Get a session. We're ignoring any error that occurs while decoding an
 		// existing session: Get() always returns a session, even if empty.
-		session, err := store.Get(r, "session-name")
-		if err != nil {
-			http.Error(w, err.Error(), 500)
-			return
-		}
+		session, _ := store.Get(r, "session-name")
 
 		// Set some session values.
 		session.Values["foo"] = "bar"
@@ -44,21 +40,21 @@ Let's start with an example that shows the sessions API in a nutshell:
 		session.Save(r, w)
 	}
 
-First we initialize a session store calling NewCookieStore() and passing a
+First, we initialize a session store calling NewCookieStore() and passing a
 secret key used to authenticate the session. Inside the handler, we call
-store.Get() to retrieve an existing session or a new one. Then we set some
+store.Get() to retrieve an existing session or a new one. Next, we set some
 session values in session.Values, which is a map[interface{}]interface{}.
-And finally we call session.Save() to save the session in the response.
+Finally, we call session.Save() to save the session in the response.
 
 Note that in production code, we should check for errors when calling
-session.Save(r, w), and either display an error message or otherwise handle it.
+session.Save(r, w), and either display an error message or handle it otherwise.
 
 Save must be called before writing to the response, otherwise the session
 cookie will not be sent to the client.
 
 Important Note: If you aren't using gorilla/mux, you need to wrap your handlers
-with context.ClearHandler as or else you will leak memory! An easy way to do this
-is to wrap the top-level mux when calling http.ListenAndServe:
+with context.ClearHandler as or else you will leak memory! An easy way to do
+this is to wrap the top-level mux when calling http.ListenAndServe:
 
     http.ListenAndServe(":8080", context.ClearHandler(http.DefaultServeMux))
 
@@ -94,8 +90,8 @@ Flash messages are useful to set information to be read after a redirection,
 like after form submissions.
 
 There may also be cases where you want to store a complex datatype within a
-session, such as a struct. Sessions are serialised using the encoding/gob package,
-so it is easy to register new datatypes for storage in sessions:
+session, such as a struct. Sessions are serialised using the encoding/gob
+package, so it is easy to register new datatypes for storage in sessions:
 
 	import(
 		"encoding/gob"
@@ -117,14 +113,16 @@ so it is easy to register new datatypes for storage in sessions:
 		gob.Register(&M{})
 	}
 
-As it's not possible to pass a raw type as a parameter to a function, gob.Register()
-relies on us passing it an empty pointer to the type as a parameter. In the example
-above we've passed it a pointer to a struct and a pointer to a custom type
-representing a map[string]interface. This will then allow us to serialise/deserialise
-values of those types to and from our sessions.
+As it's not possible to pass a raw type as a parameter to a function,
+gob.Register() relies on us passing it an empty pointer to the type as a
+parameter. In the example above we've passed it a pointer to a struct and a
+pointer to a custom type representing a map[string]interface. This will then
+allow us to serialise/deserialise values of those types to and from our
+sessions.
 
-Note that because session values are stored in a map[string]interface{}, there's
-a need to type-assert data when retrieving it. We'll use the Person struct we registered above:
+Note that because session values are stored in a map[string]interface{},
+there's a need to type-assert data when retrieving it. We'll use the Person
+struct we registered above:
 
 	func MyHandler(w http.ResponseWriter, r *http.Request) {
 		session, err := store.Get(r, "session-name")
