@@ -29,9 +29,14 @@ Let's start with an example that shows the sessions API in a nutshell:
 	var store = sessions.NewCookieStore([]byte("something-very-secret"))
 
 	func MyHandler(w http.ResponseWriter, r *http.Request) {
-		// Get a session. We're ignoring any error that occurs while decoding an
-		// existing session: Get() always returns a session, even if empty.
-		session, _ := store.Get(r, "session-name")
+		// Get a session. Any error that occurs while decoding an existing
+		// session should be handled.
+		// Note: Get() always returns a session, even if empty.
+		session, err := store.Get(r, "session-name")
+		if err != nil {
+			http.Error(w, err.Error(), 500)
+			return
+		}
 
 		// Set some session values.
 		session.Values["foo"] = "bar"
@@ -116,7 +121,7 @@ package, so it is easy to register new datatypes for storage in sessions:
 As it's not possible to pass a raw type as a parameter to a function,
 gob.Register() relies on us passing it an empty pointer to the type as a
 parameter. In the example above we've passed it a pointer to a struct and a
-pointer to a custom type representing a map[string]interface. This will then
+pointer to a custom type representing a map[string]interface{}. This will then
 allow us to serialise/deserialise values of those types to and from our
 sessions.
 
