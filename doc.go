@@ -135,7 +135,7 @@ a need to type-assert data when retrieving it. We'll use the Person struct we re
 
 		// Retrieve our struct and type-assert it
 		val := session.Values["person"]
-		var person &Person{}
+		var person = &Person{}
 		if person, ok := val.(*Person); !ok {
 			// Handle the case that it's not an expected type
 		}
