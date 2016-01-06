@@ -72,6 +72,7 @@ Other implementations of the `sessions.Store` interface:
 * [github.com/boj/rethinkstore](https://github.com/boj/rethinkstore) - RethinkDB
 * [github.com/boj/riakstore](https://github.com/boj/riakstore) - Riak
 * [github.com/michaeljs1990/sqlitestore](https://github.com/michaeljs1990/sqlitestore) - SQLite
+* [github.com/wader/gormstore](https://github.com/wader/gormstore) - GORM (MySQL, PostgreSQL, SQLite)
 
 ## License
 
