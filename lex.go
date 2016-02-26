@@ -2,8 +2,8 @@
 // https://github.com/golang/go/blob/39ad0fd0789872f9469167be7fe9578625ff246e/src/net/http/lex.go
 
 package sessions
-import "strings"
 
+import "strings"
 
 var isTokenTable = [127]bool{
 	'!':  true,
@@ -85,17 +85,14 @@ var isTokenTable = [127]bool{
 	'~':  true,
 }
 
-
 func isToken(r rune) bool {
 	i := int(r)
 	return i < len(isTokenTable) && isTokenTable[i]
 }
 
-
 func isNotToken(r rune) bool {
 	return !isToken(r)
 }
-
 
 func isCookieNameValid(raw string) bool {
 	if raw == "" {
