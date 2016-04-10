@@ -33,7 +33,7 @@ Let's start with an example that shows the sessions API in a nutshell:
 		// existing session: Get() always returns a session, even if empty.
 		session, err := store.Get(r, "session-name")
 		if err != nil {
-			http.Error(w, err.Error(), 500)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
@@ -76,7 +76,7 @@ flashes, call session.Flashes(). Here is an example:
 		// Get a session.
 		session, err := store.Get(r, "session-name")
 		if err != nil {
-			http.Error(w, err.Error(), 500)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
@@ -129,7 +129,7 @@ a need to type-assert data when retrieving it. We'll use the Person struct we re
 	func MyHandler(w http.ResponseWriter, r *http.Request) {
 		session, err := store.Get(r, "session-name")
 		if err != nil {
-			http.Error(w, err.Error(), 500)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
