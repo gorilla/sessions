@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 /*
-Package gorilla/sessions provides cookie and filesystem sessions and
+Package sessions provides cookie and filesystem sessions and
 infrastructure for custom session backends.
 
 The key features are:
