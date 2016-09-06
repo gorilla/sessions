@@ -207,8 +207,8 @@ func (s *FilesystemStore) New(r *http.Request, name string) (*Session, error) {
 // Save adds a single session to the response.
 func (s *FilesystemStore) Save(r *http.Request, w http.ResponseWriter,
 	session *Session) error {
-	// Delete if max-age is < 0
-	if session.Options.MaxAge < 0 {
+	// Delete if max-age is <= 0
+	if session.Options.MaxAge <= 0 {
 		if err := s.erase(session); err != nil {
 			return err
 		}
