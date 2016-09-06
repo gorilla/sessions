@@ -282,6 +282,9 @@ func (s *FilesystemStore) load(session *Session) error {
 func (s *FilesystemStore) erase(session *Session) error {
 	filename := filepath.Join(s.path, "session_"+session.ID)
 
+	fileMutex.RLock()
+	defer fileMutex.RUnlock()
+
 	err := os.Remove(filename)
 	return err
 }
