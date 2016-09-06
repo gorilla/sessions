@@ -205,6 +205,11 @@ func (s *FilesystemStore) New(r *http.Request, name string) (*Session, error) {
 }
 
 // Save adds a single session to the response.
+//
+// If the Options.MaxAge of the session is <= 0 then the session file will be
+// deleted from the store path. With this process it enforces the properly
+// session cookie handling so no need to trust in the cookie management in the
+// web browser.
 func (s *FilesystemStore) Save(r *http.Request, w http.ResponseWriter,
 	session *Session) error {
 	// Delete if max-age is <= 0
