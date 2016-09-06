@@ -280,7 +280,8 @@ func (s *FilesystemStore) load(session *Session) error {
 
 // delete session file
 func (s *FilesystemStore) erase(session *Session) error {
-	filename := s.path + "session_" + session.ID
+	filename := filepath.Join(s.path, "session_"+session.ID)
+
 	err := os.Remove(filename)
 	return err
 }
