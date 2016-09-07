@@ -86,7 +86,7 @@ func TestGH8FilesystemStoreDelete(t *testing.T) {
 		t.Fatal("failed to create session", err)
 	}
 
-	err = session.Save(req,w)
+	err = session.Save(req, w)
 	if err != nil {
 		t.Fatal("failed to save session", err)
 	}
@@ -112,7 +112,7 @@ func TestGH8FilesystemStoreDelete2(t *testing.T) {
 		t.Fatal("failed to create session", err)
 	}
 
-	err = session.Save(req,w)
+	err = session.Save(req, w)
 	if err != nil {
 		t.Fatal("failed to save session", err)
 	}
