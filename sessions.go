@@ -9,8 +9,6 @@ import (
 	"fmt"
 	"net/http"
 	"time"
-
-	"github.com/gorilla/context"
 )
 
 // Default flashes key.
@@ -122,17 +120,17 @@ type contextKey int
 const registryKey contextKey = 0
 
 // GetRegistry returns a registry instance for the current request.
-func GetRegistry(r *http.Request) *Registry {
-	registry := context.Get(r, registryKey)
+func GetRegistry(r *http.Request) (*Registry, *http.Request) {
+	registry := contextGet(r, registryKey)
 	if registry != nil {
-		return registry.(*Registry)
+		return registry.(*Registry), r
 	}
 	newRegistry := &Registry{
 		request:  r,
 		sessions: make(map[string]sessionInfo),
 	}
-	context.Set(r, registryKey, newRegistry)
-	return newRegistry
+	r = contextSave(r, registryKey, newRegistry)
+	return newRegistry, r
 }
 
 // Registry stores sessions used during a request.
@@ -186,7 +184,9 @@ func init() {
 
 // Save saves all sessions used during the current request.
 func Save(r *http.Request, w http.ResponseWriter) error {
-	return GetRegistry(r).Save(w)
+	var reg *Registry
+	reg, r = GetRegistry(r)
+	return reg.Save(w)
 }
 
 // NewCookie returns an http.Cookie with the options set. It also sets
