@@ -74,6 +74,20 @@ Other implementations of the `sessions.Store` interface:
 * [github.com/michaeljs1990/sqlitestore](https://github.com/michaeljs1990/sqlitestore) - SQLite
 * [github.com/wader/gormstore](https://github.com/wader/gormstore) - GORM (MySQL, PostgreSQL, SQLite)
 
+## Notes
+Note about `GetRegistry` changes: As of Go version 1.7, gorilla/sessions uses the Go standard library's `context` package rather than `gorilla/context`. This required changing `GetRegistry` to return a shallow copy of the http Request. Users of the `sessions.GetRegistry` method who are upgrading to Go 1.7 will need to change calls to `sessions.GetRegistry`. For example, this (Go 1.6 and prior):
+
+```
+reg := sessions.GetRegistry(req)
+```
+
+will need to change to this:
+
+```
+var reg *Registry
+reg, req = sessions.GetRegistry(req)
+```
+
 ## License
 
 BSD licensed. See the LICENSE file for details.
