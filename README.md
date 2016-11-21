@@ -67,6 +67,7 @@ Other implementations of the `sessions.Store` interface:
 * [github.com/dsoprea/go-appengine-sessioncascade](https://github.com/dsoprea/go-appengine-sessioncascade) - Memcache/Datastore/Context in AppEngine
 * [github.com/kidstuff/mongostore](https://github.com/kidstuff/mongostore) - MongoDB
 * [github.com/srinathgs/mysqlstore](https://github.com/srinathgs/mysqlstore) - MySQL
+* [github.com/EnumApps/clustersqlstore](https://github.com/EnumApps/clustersqlstore) - MySQL Cluster
 * [github.com/antonlindstrom/pgstore](https://github.com/antonlindstrom/pgstore) - PostgreSQL
 * [github.com/boj/redistore](https://github.com/boj/redistore) - Redis
 * [github.com/boj/rethinkstore](https://github.com/boj/rethinkstore) - RethinkDB
