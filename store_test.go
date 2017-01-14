@@ -4,6 +4,8 @@ import (
 	"encoding/base64"
 	"net/http"
 	"net/http/httptest"
+	"os"
+	"path/filepath"
 	"testing"
 )
 
@@ -96,6 +98,11 @@ func TestGH8FilesystemStoreDelete(t *testing.T) {
 	if err != nil {
 		t.Fatal("failed to delete session", err)
 	}
+
+	path := filepath.Join(os.TempDir(), "session_"+session.ID)
+	if _, err := os.Stat(path); !os.IsNotExist(err) {
+		t.Fatalf("failed to delete file: %s", path)
+	}
 }
 
 // Test delete filesystem store with max-age: 0
@@ -121,5 +128,10 @@ func TestGH8FilesystemStoreDelete2(t *testing.T) {
 	err = session.Save(req, w)
 	if err != nil {
 		t.Fatal("failed to delete session", err)
+	}
+
+	path := filepath.Join(os.TempDir(), "session_"+session.ID)
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		t.Fatalf("failed to preserve file: %s", path)
 	}
 }
