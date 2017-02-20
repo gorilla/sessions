@@ -52,6 +52,12 @@ with
 as or else you will leak memory! An easy way to do this is to wrap the top-level
 mux when calling http.ListenAndServe:
 
+```go
+	http.ListenAndServe(":8080", context.ClearHandler(http.DefaultServeMux))
+```
+
+The ClearHandler function is provided by the gorilla/context package.
+
 More examples are available [on the Gorilla
 website](http://www.gorillatoolkit.org/pkg/sessions).
 
