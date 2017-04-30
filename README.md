@@ -48,11 +48,45 @@ secret key used to authenticate the session. Inside the handler, we call
 session values in session.Values, which is a `map[interface{}]interface{}`.
 And finally we call `session.Save()` to save the session in the response.
 
-Important Note: If you aren't using gorilla/mux, you need to wrap your handlers
-with
+## Avoiding Memory Leaks
+
+If you are not using gorilla/mux (or are using context), you will
+need to perform additional cleanup or else you will leak memory!
+
+Here is an example that illustrates proper cleanup:
+
+```go
+	import (
+		"context"
+		"net/http"
+
+		gorillacontext "github.com/gorilla/context"
+		"github.com/gorilla/sessions"
+	)
+
+	var store = sessions.NewCookieStore([]byte("something-very-secret"))
+
+	func MyHandler(w http.ResponseWriter, r *http.Request) {
+		// Store some context on the request. This creates
+		// a shallow copy of the request object.
+		r = r.WithContext(context.TODO())
+
+		// Get a session. We're ignoring the error resulted from decoding an
+		// existing session: Get() always returns a session, even if empty.
+		session, _ := store.Get(r, "session-name")
+
+		// Clear the registry at the end of the request lifecycle
+		defer gorillacontext.Clear(r)
+
+		// Do additional work - middleware, etc.
+		// ...
+	}
+```
+
+If your handler middleware does not manipulate the request pointer, you
+can also accomplish this more easily by wrapping your handlers with
 [`context.ClearHandler`](http://www.gorillatoolkit.org/pkg/context#ClearHandler)
-as or else you will leak memory! An easy way to do this is to wrap the top-level
-mux when calling http.ListenAndServe:
+at the top-level mux when calling http.ListenAndServe:
 
 ```go
 	http.ListenAndServe(":8080", context.ClearHandler(http.DefaultServeMux))
