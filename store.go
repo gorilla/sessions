@@ -106,6 +106,9 @@ func (s *CookieStore) Save(r *http.Request, w http.ResponseWriter,
 	session *Session) error {
 	encoded, err := securecookie.EncodeMulti(session.Name(), session.Values,
 		s.Codecs...)
+	if session.ID == "" {
+		session.ID = encoded
+	}
 	if err != nil {
 		return err
 	}
