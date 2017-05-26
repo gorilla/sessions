@@ -90,6 +90,20 @@ func (s *Session) AddFlash(value interface{}, vars ...string) {
 	s.Values[key] = append(flashes, value)
 }
 
+// MultipleFlashes return a map of flash messages with provided keys.
+func (s *Session) MultipleFlashes(vars ...string) map[string]interface{} {
+	flashes := make(map[string]interface{}, len(vars))
+
+	for _, key := range vars {
+		if v, ok := s.Values[key]; ok {
+			delete(s.Values, key)
+			flashes[key] = v
+		}
+	}
+
+	return flashes
+}
+
 // Save is a convenience method to save this session. It is the same as calling
 // store.Save(request, response, session). You should call Save before writing to
 // the response or returning from the handler.
