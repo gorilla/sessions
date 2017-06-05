@@ -64,25 +64,26 @@ More examples are available [on the Gorilla
 website](http://www.gorillatoolkit.org/pkg/sessions).
 
 ## Multiple Flashes Example
-For getting more than one flashes in a map you can use below method in your code :
+For retrieving multiple flashes from a single session, you can loop over the Flashes map :
 ```go
-  func (s *Session) MultipleFlashes(vars ...string) map[string]interface{} {
-  	flashes := make(map[string]interface{}, len(vars))
-  
-  	for _, key := range vars {
-  		if v, ok := s.Values[key]; ok {
-  			delete(s.Values, key)
-  			flashes[key] = v
-  		}
-  	}
-  
-  	return flashes
-  }
+  func MultipleFlashes(s *sessions.Session, vars ...string) map[string]interface{} {
+	flashes := make(map[string]interface{}, len(vars))
+
+	for _, key := range vars {
+		if v, ok := s.Values[key]; ok {
+			delete(s.Values, key)
+			flashes[key] = v
+		}
+	}
+
+	return flashes
+}
  ```
 example :
 ```go
 	session, _ := store.Get(r, "session-name")
-	flashes := session.MultipleFlashes("first-flash-key", "second-flash-key")
+	flashes := MultipleFlashes(session, "first-flash-key", "second-flash-key")
+	session.Save(r, w)
 ```
 
 
