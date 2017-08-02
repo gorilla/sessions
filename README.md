@@ -44,14 +44,14 @@ Let's start with an example that shows the sessions API in a nutshell:
 
 First we initialize a session store calling `NewCookieStore()` and passing a
 secret key used to authenticate the session. Inside the handler, we call
-`store.Get()` to retrieve an existing session or a new one. Then we set some
-session values in session.Values, which is a `map[interface{}]interface{}`.
+`store.Get()` to retrieve an existing session or create a new one. Then we set
+some session values in session.Values, which is a `map[interface{}]interface{}`.
 And finally we call `session.Save()` to save the session in the response.
 
 Important Note: If you aren't using gorilla/mux, you need to wrap your handlers
 with
 [`context.ClearHandler`](http://www.gorillatoolkit.org/pkg/context#ClearHandler)
-as or else you will leak memory! An easy way to do this is to wrap the top-level
+or else you will leak memory! An easy way to do this is to wrap the top-level
 mux when calling http.ListenAndServe:
 
 ```go
