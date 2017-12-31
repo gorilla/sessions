@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"os"
 )
 
 // Test for GH-8 for CookieStore
@@ -125,5 +126,35 @@ func TestGH8FilesystemStoreDelete2(t *testing.T) {
 	err = session.Save(req, w)
 	if err != nil {
 		t.Fatal("failed to delete session", err)
+	}
+}
+
+// Test delete filesystem store with file already deleted
+func TestGH8FilesystemStoreDelete3(t *testing.T) {
+	store := NewFilesystemStore("", []byte("some key"))
+	req, err := http.NewRequest("GET", "http://www.example.com", nil)
+	if err != nil {
+		t.Fatal("failed to create request", err)
+	}
+	w := httptest.NewRecorder()
+
+	session, err := store.New(req, "hello")
+	if err != nil {
+		t.Fatal("failed to create session", err)
+	}
+
+	err = session.Save(req, w)
+	if err != nil {
+		t.Fatal("failed to save session", err)
+	}
+
+	err = os.Remove(store.filename(session))
+	if err != nil {
+		t.Fatal("failed to remove session file", err)
+	}
+
+	err = session.Save(req, w)
+	if err != nil {
+		t.Fatal("failed to save session", err)
 	}
 }
