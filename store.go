@@ -261,18 +261,16 @@ func (s *FilesystemStore) save(session *Session) error {
 	if err != nil {
 		return err
 	}
-	filename := filepath.Join(s.path, "session_"+session.ID)
 	fileMutex.Lock()
 	defer fileMutex.Unlock()
-	return ioutil.WriteFile(filename, []byte(encoded), 0600)
+	return ioutil.WriteFile(s.filename(session), []byte(encoded), 0600)
 }
 
 // load reads a file and decodes its content into session.Values.
 func (s *FilesystemStore) load(session *Session) error {
-	filename := filepath.Join(s.path, "session_"+session.ID)
 	fileMutex.RLock()
 	defer fileMutex.RUnlock()
-	fdata, err := ioutil.ReadFile(filename)
+	fdata, err := ioutil.ReadFile(s.filename(session))
 	if err != nil {
 		return err
 	}
@@ -285,11 +283,17 @@ func (s *FilesystemStore) load(session *Session) error {
 
 // delete session file
 func (s *FilesystemStore) erase(session *Session) error {
-	filename := filepath.Join(s.path, "session_"+session.ID)
-
 	fileMutex.RLock()
 	defer fileMutex.RUnlock()
 
-	err := os.Remove(filename)
+	err := os.Remove(s.filename(session))
+	if os.IsNotExist(err) {
+		return nil
+	}
 	return err
+}
+
+// filename returns a full file path appropriate for storing session values.
+func (s *FilesystemStore) filename(session *Session) string {
+	return filepath.Join(s.path, "session_"+session.ID)
 }
