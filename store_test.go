@@ -64,13 +64,13 @@ func TestGH2MaxLength(t *testing.T) {
 	}
 
 	session.Values["big"] = make([]byte, base64.StdEncoding.DecodedLen(4096*2))
-	err = session.Save(req, w)
+	err = session.Save(w)
 	if err == nil {
 		t.Fatal("expected an error, got nil")
 	}
 
 	store.MaxLength(4096 * 3) // A bit more than the value size to account for encoding overhead.
-	err = session.Save(req, w)
+	err = session.Save(w)
 	if err != nil {
 		t.Fatal("failed to Save:", err)
 	}
@@ -90,13 +90,13 @@ func TestGH8FilesystemStoreDelete(t *testing.T) {
 		t.Fatal("failed to create session", err)
 	}
 
-	err = session.Save(req, w)
+	err = session.Save(w)
 	if err != nil {
 		t.Fatal("failed to save session", err)
 	}
 
 	session.Options.MaxAge = -1
-	err = session.Save(req, w)
+	err = session.Save(w)
 	if err != nil {
 		t.Fatal("failed to delete session", err)
 	}
@@ -116,13 +116,13 @@ func TestGH8FilesystemStoreDelete2(t *testing.T) {
 		t.Fatal("failed to create session", err)
 	}
 
-	err = session.Save(req, w)
+	err = session.Save(w)
 	if err != nil {
 		t.Fatal("failed to save session", err)
 	}
 
 	session.Options.MaxAge = 0
-	err = session.Save(req, w)
+	err = session.Save(w)
 	if err != nil {
 		t.Fatal("failed to delete session", err)
 	}
