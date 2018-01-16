@@ -155,7 +155,14 @@ func TestFlashes(t *testing.T) {
 	}
 }
 
-func TestSessionCookieStore(t *testing.T) {
+func TestCookieStoreMapPanic(t *testing.T) {
+	defer func() {
+		err := recover()
+		if err != nil {
+			t.Fatal(err)
+		}
+	}()
+
 	store := NewCookieStore([]byte("aaa0defe5d2839cbc46fc4f080cd7adc"))
 	req, err := http.NewRequest("GET", "http://www.example.com", nil)
 	if err != nil {
