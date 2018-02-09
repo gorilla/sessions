@@ -155,6 +155,31 @@ func TestFlashes(t *testing.T) {
 	}
 }
 
+func TestCookieStoreMapPanic(t *testing.T) {
+	defer func() {
+		err := recover()
+		if err != nil {
+			t.Fatal(err)
+		}
+	}()
+
+	store := NewCookieStore([]byte("aaa0defe5d2839cbc46fc4f080cd7adc"))
+	req, err := http.NewRequest("GET", "http://www.example.com", nil)
+	if err != nil {
+		t.Fatal("failed to create request", err)
+	}
+	w := httptest.NewRecorder()
+
+	session := NewSession(store, "hello")
+
+	session.Values["data"] = "hello-world"
+
+	err = session.Save(req, w)
+	if err != nil {
+		t.Fatal("failed to save session", err)
+	}
+}
+
 func init() {
 	gob.Register(FlashMessage{})
 }
