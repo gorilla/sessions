@@ -109,7 +109,9 @@ func (s *CookieStore) Save(r *http.Request, w http.ResponseWriter,
 	if err != nil {
 		return err
 	}
-	http.SetCookie(w, NewCookie(session.Name(), encoded, session.Options))
+	if w != nil {
+		http.SetCookie(w, NewCookie(session.Name(), encoded, session.Options))
+	}
 	return nil
 }
 
