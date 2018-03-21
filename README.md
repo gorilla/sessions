@@ -85,6 +85,7 @@ Other implementations of the `sessions.Store` interface:
 * [github.com/wader/gormstore](https://github.com/wader/gormstore) - GORM (MySQL, PostgreSQL, SQLite)
 * [github.com/gernest/qlstore](https://github.com/gernest/qlstore) - ql
 * [github.com/quasoft/memstore](https://github.com/quasoft/memstore) - In-memory implementation for use in unit tests
+* [github.com/lafriks/xormstore](https://github.com/lafriks/xormstore) - XORM (MySQL, PostgreSQL, SQLite, Microsoft SQL Server, TiDB)
 
 ## License
 
