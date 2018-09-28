@@ -1,7 +1,6 @@
 package sessions
 
 import (
-	"strconv"
 	"testing"
 )
 
@@ -25,36 +24,34 @@ func TestNewCookieFromOptions(t *testing.T) {
 		{"foo", "bar", "/foo/bar", "foo.example.com", 3600, true, false},
 	}
 	for i, v := range tests {
-		t.Run(strconv.Itoa(i+1), func(t *testing.T) {
-			options := &Options{
-				Path:     v.path,
-				Domain:   v.domain,
-				MaxAge:   v.maxAge,
-				Secure:   v.secure,
-				HttpOnly: v.httpOnly,
-			}
-			cookie := newCookieFromOptions(v.name, v.value, options)
-			if cookie.Name != v.name {
-				t.Fatalf("bad cookie name: got %q, want %q", cookie.Name, v.name)
-			}
-			if cookie.Value != v.value {
-				t.Fatalf("bad cookie value: got %q, want %q", cookie.Value, v.value)
-			}
-			if cookie.Path != v.path {
-				t.Fatalf("bad cookie path: got %q, want %q", cookie.Path, v.path)
-			}
-			if cookie.Domain != v.domain {
-				t.Fatalf("bad cookie domain: got %q, want %q", cookie.Domain, v.domain)
-			}
-			if cookie.MaxAge != v.maxAge {
-				t.Fatalf("bad cookie maxAge: got %q, want %q", cookie.MaxAge, v.maxAge)
-			}
-			if cookie.Secure != v.secure {
-				t.Fatalf("bad cookie secure: got %v, want %v", cookie.Secure, v.secure)
-			}
-			if cookie.HttpOnly != v.httpOnly {
-				t.Fatalf("bad cookie httpOnly: got %v, want %v", cookie.HttpOnly, v.httpOnly)
-			}
-		})
+		options := &Options{
+			Path:     v.path,
+			Domain:   v.domain,
+			MaxAge:   v.maxAge,
+			Secure:   v.secure,
+			HttpOnly: v.httpOnly,
+		}
+		cookie := newCookieFromOptions(v.name, v.value, options)
+		if cookie.Name != v.name {
+			t.Fatalf("%v: bad cookie name: got %q, want %q", i+1, cookie.Name, v.name)
+		}
+		if cookie.Value != v.value {
+			t.Fatalf("%v: bad cookie value: got %q, want %q", i+1, cookie.Value, v.value)
+		}
+		if cookie.Path != v.path {
+			t.Fatalf("%v: bad cookie path: got %q, want %q", i+1, cookie.Path, v.path)
+		}
+		if cookie.Domain != v.domain {
+			t.Fatalf("%v: bad cookie domain: got %q, want %q", i+1, cookie.Domain, v.domain)
+		}
+		if cookie.MaxAge != v.maxAge {
+			t.Fatalf("%v: bad cookie maxAge: got %q, want %q", i+1, cookie.MaxAge, v.maxAge)
+		}
+		if cookie.Secure != v.secure {
+			t.Fatalf("%v: bad cookie secure: got %v, want %v", i+1, cookie.Secure, v.secure)
+		}
+		if cookie.HttpOnly != v.httpOnly {
+			t.Fatalf("%v: bad cookie httpOnly: got %v, want %v", i+1, cookie.HttpOnly, v.httpOnly)
+		}
 	}
 }

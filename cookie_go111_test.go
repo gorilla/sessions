@@ -4,7 +4,6 @@ package sessions
 
 import (
 	"net/http"
-	"strconv"
 	"testing"
 )
 
@@ -19,14 +18,12 @@ func TestNewCookieFromOptionsSameSite(t *testing.T) {
 		{http.SameSiteStrictMode},
 	}
 	for i, v := range tests {
-		t.Run(strconv.Itoa(i+1), func(t *testing.T) {
-			options := &Options{
-				SameSite: v.sameSite,
-			}
-			cookie := newCookieFromOptions("", "", options)
-			if cookie.SameSite != v.sameSite {
-				t.Fatalf("bad cookie sameSite: got %v, want %v", cookie.SameSite, v.sameSite)
-			}
-		})
+		options := &Options{
+			SameSite: v.sameSite,
+		}
+		cookie := newCookieFromOptions("", "", options)
+		if cookie.SameSite != v.sameSite {
+			t.Fatalf("%v: bad cookie sameSite: got %v, want %v", i+1, cookie.SameSite, v.sameSite)
+		}
 	}
 }
