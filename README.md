@@ -53,7 +53,7 @@ And finally we call `session.Save()` to save the session in the response.
 
 Important Note: If you aren't using gorilla/mux, you need to wrap your handlers
 with
-[`context.ClearHandler`](http://www.gorillatoolkit.org/pkg/context#ClearHandler)
+[`context.ClearHandler`](https://www.gorillatoolkit.org/pkg/context#ClearHandler)
 or else you will leak memory! An easy way to do this is to wrap the top-level
 mux when calling http.ListenAndServe:
 
@@ -64,7 +64,7 @@ mux when calling http.ListenAndServe:
 The ClearHandler function is provided by the gorilla/context package.
 
 More examples are available [on the Gorilla
-website](http://www.gorillatoolkit.org/pkg/sessions).
+website](https://www.gorillatoolkit.org/pkg/sessions).
 
 ## Store Implementations
 
