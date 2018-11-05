@@ -92,6 +92,21 @@ func (s *Session) Store() Store {
 	return s.store
 }
 
+// New returns wether the session is new.
+func (s *Session) New() bool {
+	return s.IsNew
+}
+
+// SetValue sets given key-value pair into the session.
+func (s *Session) SetValue(k interface{}, v interface{}) {
+	s.Values[k] = v
+}
+
+// Value returns the session value for given key.
+func (s *Session) Value(k interface{}) interface{} {
+	return s.Values[k]
+}
+
 // Registry -------------------------------------------------------------------
 
 // sessionInfo stores a session tracked by the registry.
