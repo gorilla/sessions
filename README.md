@@ -31,7 +31,7 @@ Let's start with an example that shows the sessions API in a nutshell:
 	// environmental variable, or flag (or both), and don't accidentally commit it
 	// alongside your code. Ensure your key is sufficiently random - i.e. use Go's
 	// crypto/rand or securecookie.GenerateRandomKey(32) and persist the result.
-	var store = sessions.NewCookieStore(os.Getenv("SESSION_KEY"))
+	var store = sessions.NewCookieStore([]byte(os.Getenv("SESSION_KEY")))
 
 	func MyHandler(w http.ResponseWriter, r *http.Request) {
 		// Get a session. We're ignoring the error resulted from decoding an
