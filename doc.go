@@ -59,14 +59,6 @@ session.Save(r, w), and either display an error message or otherwise handle it.
 Save must be called before writing to the response, otherwise the session
 cookie will not be sent to the client.
 
-Important Note: If you aren't using gorilla/mux, you need to wrap your handlers
-with context.ClearHandler as or else you will leak memory! An easy way to do this
-is to wrap the top-level mux when calling http.ListenAndServe:
-
-    http.ListenAndServe(":8080", context.ClearHandler(http.DefaultServeMux))
-
-The ClearHandler function is provided by the gorilla/context package.
-
 That's all you need to know for the basic usage. Let's take a look at other
 options, starting with flash messages.
 
