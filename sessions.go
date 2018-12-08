@@ -5,12 +5,11 @@
 package sessions
 
 import (
+	"context"
 	"encoding/gob"
 	"fmt"
 	"net/http"
 	"time"
-
-	"github.com/gorilla/context"
 )
 
 // Default flashes key.
@@ -108,7 +107,8 @@ const registryKey contextKey = 0
 
 // GetRegistry returns a registry instance for the current request.
 func GetRegistry(r *http.Request) *Registry {
-	registry := context.Get(r, registryKey)
+	var ctx = r.Context()
+	registry := ctx.Value(registryKey)
 	if registry != nil {
 		return registry.(*Registry)
 	}
@@ -116,7 +116,7 @@ func GetRegistry(r *http.Request) *Registry {
 		request:  r,
 		sessions: make(map[string]sessionInfo),
 	}
-	context.Set(r, registryKey, newRegistry)
+	*r = *r.WithContext(context.WithValue(ctx, registryKey, newRegistry))
 	return newRegistry
 }
 
