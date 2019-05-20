@@ -65,7 +65,8 @@ Other implementations of the `sessions.Store` interface:
 - [github.com/savaki/dynastore](https://github.com/savaki/dynastore) - DynamoDB on AWS (Official AWS library)
 - [github.com/bradleypeabody/gorilla-sessions-memcache](https://github.com/bradleypeabody/gorilla-sessions-memcache) - Memcache
 - [github.com/dsoprea/go-appengine-sessioncascade](https://github.com/dsoprea/go-appengine-sessioncascade) - Memcache/Datastore/Context in AppEngine
-- [github.com/kidstuff/mongostore](https://github.com/kidstuff/mongostore) - MongoDB
+- [github.com/kidstuff/mongostore](https://github.com/kidstuff/mongostore) - MongoDB ([github.com/globalsign/mgo](https://github.com/globalsign/mgo) driver)
+- [github.com/go-stuff/mongostore](https://github.com/go-stuff/mongostore) - MongoDB ([github.com/mongodb/mongo-go-driver](https://github.com/mongodb/mongo-go-driver) driver)
 - [github.com/srinathgs/mysqlstore](https://github.com/srinathgs/mysqlstore) - MySQL
 - [github.com/EnumApps/clustersqlstore](https://github.com/EnumApps/clustersqlstore) - MySQL Cluster
 - [github.com/antonlindstrom/pgstore](https://github.com/antonlindstrom/pgstore) - PostgreSQL
