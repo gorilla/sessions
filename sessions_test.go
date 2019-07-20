@@ -20,10 +20,6 @@ func NewRecorder() *httptest.ResponseRecorder {
 	}
 }
 
-// DefaultRemoteAddr is the default remote address to return in RemoteAddr if
-// an explicit DefaultRemoteAddr isn't set on ResponseRecorder.
-const DefaultRemoteAddr = "1.2.3.4"
-
 // ----------------------------------------------------------------------------
 
 type FlashMessage struct {
