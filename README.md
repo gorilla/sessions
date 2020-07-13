@@ -83,6 +83,7 @@ Other implementations of the `sessions.Store` interface:
 - [github.com/quasoft/memstore](https://github.com/quasoft/memstore) - In-memory implementation for use in unit tests
 - [github.com/lafriks/xormstore](https://github.com/lafriks/xormstore) - XORM (MySQL, PostgreSQL, SQLite, Microsoft SQL Server, TiDB)
 - [github.com/GoogleCloudPlatform/firestore-gorilla-sessions](https://github.com/GoogleCloudPlatform/firestore-gorilla-sessions) - Cloud Firestore
+- [github.com/stephenafamo/crdbstore](https://github.com/stephenafamo/crdbstore) - CockroachDB
 
 ## License
 
