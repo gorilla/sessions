@@ -41,7 +41,7 @@ Let's start with an example that shows the sessions API in a nutshell:
 		session.Values["foo"] = "bar"
 		session.Values[42] = 43
 		// Save it before we write to the response/return from the handler.
-		err = session.Save(r, w)
+		err := session.Save(r, w)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
