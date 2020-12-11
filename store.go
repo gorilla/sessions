@@ -212,7 +212,7 @@ func (s *FilesystemStore) Save(r *http.Request, w http.ResponseWriter,
 	session *Session) error {
 	// Delete if max-age is <= 0
 	if session.Options.MaxAge <= 0 {
-		if err := s.erase(session); err != nil {
+		if err := s.erase(session); err != nil && !os.IsNotExist(err) {
 			return err
 		}
 		http.SetCookie(w, NewCookie(session.Name(), "", session.Options))
