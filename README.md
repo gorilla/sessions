@@ -70,6 +70,7 @@ Other implementations of the `sessions.Store` interface:
 - [github.com/bradleypeabody/gorilla-sessions-memcache](https://github.com/bradleypeabody/gorilla-sessions-memcache) - Memcache
 - [github.com/dsoprea/go-appengine-sessioncascade](https://github.com/dsoprea/go-appengine-sessioncascade) - Memcache/Datastore/Context in AppEngine
 - [github.com/kidstuff/mongostore](https://github.com/kidstuff/mongostore) - MongoDB
+- [github.com/mcquackers/gorilla-sessions-mongo](https://github.com/mcquackers/gorilla-sessions-mongo) - MongoDB (mongo-go-driver)
 - [github.com/srinathgs/mysqlstore](https://github.com/srinathgs/mysqlstore) - MySQL
 - [github.com/EnumApps/clustersqlstore](https://github.com/EnumApps/clustersqlstore) - MySQL Cluster
 - [github.com/antonlindstrom/pgstore](https://github.com/antonlindstrom/pgstore) - PostgreSQL
