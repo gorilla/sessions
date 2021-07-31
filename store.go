@@ -10,7 +10,6 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-	"strings"
 	"sync"
 
 	"github.com/gorilla/securecookie"
@@ -201,6 +200,8 @@ func (s *FilesystemStore) New(r *http.Request, name string) (*Session, error) {
 	return session, err
 }
 
+var base32RawStdEncoding = base32.StdEncoding.WithPadding(base32.NoPadding)
+
 // Save adds a single session to the response.
 //
 // If the Options.MaxAge of the session is <= 0 then the session file will be
@@ -221,9 +222,8 @@ func (s *FilesystemStore) Save(r *http.Request, w http.ResponseWriter,
 	if session.ID == "" {
 		// Because the ID is used in the filename, encode it to
 		// use alphanumeric characters only.
-		session.ID = strings.TrimRight(
-			base32.StdEncoding.EncodeToString(
-				securecookie.GenerateRandomKey(32)), "=")
+		session.ID = base32RawStdEncoding.EncodeToString(
+			securecookie.GenerateRandomKey(32))
 	}
 	if err := s.save(session); err != nil {
 		return err
