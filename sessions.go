@@ -95,8 +95,7 @@ func (s *Session) Store() Store {
 
 // sessionInfo stores a session tracked by the registry.
 type sessionInfo struct {
-	s *Session
-	e error
+	*Session
 }
 
 // contextKey is the type used to store the registry in the context.
@@ -134,11 +133,14 @@ func (s *Registry) Get(store Store, name string) (session *Session, err error) {
 		return nil, fmt.Errorf("sessions: invalid character in cookie name: %s", name)
 	}
 	if info, ok := s.sessions[name]; ok {
-		session, err = info.s, info.e
+		session = info.Session
 	} else {
 		session, err = store.New(s.request, name)
+		if err != nil {
+			return
+		}
 		session.name = name
-		s.sessions[name] = sessionInfo{s: session, e: err}
+		s.sessions[name] = sessionInfo{session}
 	}
 	session.store = store
 	return
@@ -148,7 +150,7 @@ func (s *Registry) Get(store Store, name string) (session *Session, err error) {
 func (s *Registry) Save(w http.ResponseWriter) error {
 	var errMulti MultiError
 	for name, info := range s.sessions {
-		session := info.s
+		session := info.Session
 		if session.store == nil {
 			errMulti = append(errMulti, fmt.Errorf(
 				"sessions: missing store for session %q", name))
