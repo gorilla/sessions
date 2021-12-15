@@ -133,7 +133,7 @@ func (s *Registry) Get(store Store, name string) (session *Session, err error) {
 		return nil, fmt.Errorf("sessions: invalid character in cookie name: %s", name)
 	}
 	if info, ok := s.sessions[name]; ok {
-		session = info.Session
+		session, err = info.Session, nil
 	} else {
 		session, err = store.New(s.request, name)
 		if err != nil {
