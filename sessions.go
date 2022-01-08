@@ -136,9 +136,6 @@ func (s *Registry) Get(store Store, name string) (session *Session, err error) {
 		session, err = info.Session, nil
 	} else {
 		session, err = store.New(s.request, name)
-		if err != nil {
-			return
-		}
 		session.name = name
 		s.sessions[name] = sessionInfo{session}
 	}
