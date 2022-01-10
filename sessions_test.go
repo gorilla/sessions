@@ -182,6 +182,60 @@ func TestFlashes(t *testing.T) {
 	}
 }
 
+func TestUsesExactStore(t *testing.T) {
+	store := NewCookieStore([]byte("aaa0defe5d2839cbc46fc4f080cd7adc"))
+
+	req, err := http.NewRequest("GET", "http://www.example.com", nil)
+	if err != nil {
+		t.Fatal("failed to create request", err)
+	}
+
+	w := httptest.NewRecorder()
+	session := NewSession(store, "hello")
+	session.Values["data"] = "foo"
+	err = session.Save(req, w)
+	if err != nil {
+		t.Fatal("failed to save session", err)
+	}
+
+	session = NewSession(store, "hello")
+	session.Values["data"] = "bar"
+	session.Options.Domain = "www.example.com"
+	err = session.Save(req, w)
+	if err != nil {
+		t.Fatal("failed to save session", err)
+	}
+
+	req, err = http.NewRequest("GET", "http://www.example.com", nil)
+	if err != nil {
+		t.Fatal("failed to create request", err)
+	}
+
+	if len(w.Result().Cookies()) != 2 {
+		t.Fatalf("expected two cookies but got 0: %+v", w.Result().Header)
+	}
+
+	for _, cookie := range w.Result().Cookies() {
+		req.AddCookie(cookie)
+	}
+
+	for _, expected := range []string{
+		"bar",
+		// Doing it again returns the accurate cookie as well, even though we are using the cache now.
+		"foo",
+	} {
+		actual, err := store.GetExact(req, "hello", func(s *Session) bool {
+			return s.Values["data"] == expected
+		})
+		if err != nil {
+			t.Fatal("failed to get cookie request", err)
+		}
+		if actual.Values["data"] != expected {
+			t.Fatalf("expected session data to be '%s' but got %v", expected, actual.Values)
+		}
+	}
+}
+
 func TestCookieStoreMapPanic(t *testing.T) {
 	defer func() {
 		err := recover()

@@ -32,6 +32,32 @@ type Store interface {
 	Save(r *http.Request, w http.ResponseWriter, s *Session) error
 }
 
+// StoreExact is an interface for custom session stores with matching capabilities.
+//
+// Stores should implement this interface if they want the consumer to be able
+// to decide which exact session store to use when multiple sessions are given.
+//
+// See CookieStore and FilesystemStore for examples.
+type StoreExact interface {
+	Store
+
+	// NewExact should return a session for the given name and matcher.go
+	// without adding it to the registry.
+	//
+	// The difference between StoreExact.NewExact() and Store.New() is that
+	// calling Store.New() will find one cookie using the given name. If
+	// multiple cookies with the same name exist, it will return only one of
+	// them. Calling StoreExact.NewExact() allows you to further specify
+	// which cookie when multiple cookies with the same name exist.
+	//
+	// Please note that only the first value for which matcher.go returns true will be used.
+	NewExact(r *http.Request, name string, matcher Matcher) (*Session, error)
+
+	// GetExact should return a cached session and uses StoreExact.NewExact, with
+	// the same rules applied, instead of Store.New to find the appropriate cookie.
+	GetExact(r *http.Request, name string, matcher Matcher) (*Session, error)
+}
+
 // CookieStore ----------------------------------------------------------------
 
 // NewCookieStore returns a new CookieStore.
@@ -65,6 +91,10 @@ type CookieStore struct {
 	Options *Options // default configuration
 }
 
+// Type guards
+var _ Store = (*CookieStore)(nil)
+var _ StoreExact = (*CookieStore)(nil)
+
 // Get returns a session for the given name after adding it to the registry.
 //
 // It returns a new session if the sessions doesn't exist. Access IsNew on
@@ -74,6 +104,12 @@ type CookieStore struct {
 // not be decoded.
 func (s *CookieStore) Get(r *http.Request, name string) (*Session, error) {
 	return GetRegistry(r).Get(s, name)
+}
+
+// GetExact returns a cached session and uses StoreExact.NewExact, with
+// the same rules applied, instead of Store.New to find the appropriate cookie.
+func (s *CookieStore) GetExact(r *http.Request, name string, matcher Matcher) (*Session, error) {
+	return GetRegistry(r).GetExact(s, name, matcher)
 }
 
 // New returns a session for the given name without adding it to the registry.
@@ -94,6 +130,39 @@ func (s *CookieStore) New(r *http.Request, name string) (*Session, error) {
 			session.IsNew = false
 		}
 	}
+	return session, err
+}
+
+// NewExact returns a session for the given name and matcher.go without adding it to the registry.
+//
+// The difference between NewExact() and New() is that calling New() will find one
+// cookie using the given name. If multiple cookies with the same name exist, it will
+// return only one of them. Calling NewMatch() allows you to further specify which cookie
+// when multiple cookies with the same name exist.
+//
+// Please note that only the first value for which matcher.go returns true will be used.
+func (s *CookieStore) NewExact(r *http.Request, name string, matcher Matcher) (*Session, error) {
+	session := NewSession(s, name)
+	opts := *s.Options
+	session.Options = &opts
+	session.IsNew = true
+	var err error
+	for _, c := range r.Cookies() {
+		if c.Name != name {
+			continue
+		}
+
+		err = securecookie.DecodeMulti(name, c.Value, &session.Values,
+			s.Codecs...)
+		if err == nil {
+			if matcher(session) {
+				session.IsNew = false
+				break
+			}
+			session.Values = make(map[interface{}]interface{})
+		}
+	}
+
 	return session, err
 }
 
@@ -161,6 +230,10 @@ type FilesystemStore struct {
 	path    string
 }
 
+// Type guards
+var _ Store = (*FilesystemStore)(nil)
+var _ StoreExact = (*FilesystemStore)(nil)
+
 // MaxLength restricts the maximum length of new sessions to l.
 // If l is 0 there is no limit to the size of a session, use with caution.
 // The default for a new FilesystemStore is 4096.
@@ -179,24 +252,50 @@ func (s *FilesystemStore) Get(r *http.Request, name string) (*Session, error) {
 	return GetRegistry(r).Get(s, name)
 }
 
+// GetExact returns a cached session and uses StoreExact.NewExact, with
+// the same rules applied, instead of Store.New to find the appropriate cookie.
+func (s *FilesystemStore) GetExact(r *http.Request, name string, matcher Matcher) (*Session, error) {
+	return GetRegistry(r).GetExact(s, name, matcher)
+}
+
 // New returns a session for the given name without adding it to the registry.
 //
 // See CookieStore.New().
 func (s *FilesystemStore) New(r *http.Request, name string) (*Session, error) {
+	return s.NewExact(r, name, FirstMatcher)
+}
+
+// NewExact returns a session for the given name and matcher.go without adding it to the registry.
+//
+// The difference between NewExact() and New() is that calling New() will find one
+// cookie using the given name. If multiple cookies with the same name exist, it will
+// return only one of them. Calling NewMatch() allows you to further specify which cookie
+// when multiple cookies with the same name exist.
+//
+// Please note that only the first value for which matcher.go returns true will be used.
+func (s *FilesystemStore) NewExact(r *http.Request, name string, matcher Matcher) (*Session, error) {
 	session := NewSession(s, name)
 	opts := *s.Options
 	session.Options = &opts
 	session.IsNew = true
 	var err error
-	if c, errCookie := r.Cookie(name); errCookie == nil {
+	for _, c := range r.Cookies() {
+		if c.Name != name {
+			continue
+		}
+
+		session.Values = make(map[interface{}]interface{})
 		err = securecookie.DecodeMulti(name, c.Value, &session.ID, s.Codecs...)
 		if err == nil {
 			err = s.load(session)
 			if err == nil {
-				session.IsNew = false
+				if matcher(session) {
+					session.IsNew = false
+				}
 			}
 		}
 	}
+
 	return session, err
 }
 

@@ -129,17 +129,42 @@ type Registry struct {
 // Get registers and returns a session for the given name and session store.
 //
 // It returns a new session if there are no sessions registered for the name.
+//
+// If more than one cookie with the given name is found, only the one cookie
+// is used to find the session.
 func (s *Registry) Get(store Store, name string) (session *Session, err error) {
+	return s.GetExact(store, name, FirstMatcher)
+}
+
+// GetExact registers and returns a session for the given name and session store.
+//
+// It returns a new session if there are no sessions found. Please note that
+// the underlying store must implement the StoreExact interface or using this
+// method will always return the first cookie found and ignore the matcher
+// parameter.
+//
+// Use the matcher function to explicitly set which existing session to use
+// if multiple cookies with the same name have been sent.
+//
+// Unless this method returns an error, it will always return at least one session
+// in the slice.
+func (s *Registry) GetExact(store Store, name string, matcher Matcher) (session *Session, err error) {
 	if !isCookieNameValid(name) {
 		return nil, fmt.Errorf("sessions: invalid character in cookie name: %s", name)
 	}
-	if info, ok := s.sessions[name]; ok {
-		session, err = info.s, info.e
-	} else {
-		session, err = store.New(s.request, name)
-		session.name = name
-		s.sessions[name] = sessionInfo{s: session, e: err}
+
+	if info, ok := s.sessions[name]; ok && matcher(info.s) {
+		return info.s, info.e
 	}
+
+	switch ts := store.(type) {
+	case StoreExact:
+		session, err = ts.NewExact(s.request, name, matcher)
+	default:
+		session, err = store.New(s.request, name)
+	}
+	session.name = name
+	s.sessions[name] = sessionInfo{s: session, e: err}
 	session.store = store
 	return
 }

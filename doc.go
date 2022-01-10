@@ -203,5 +203,29 @@ at once: it's sessions.Save(). Here's an example:
 
 This is possible because when we call Get() from a session store, it adds the
 session to a common registry. Save() uses it to save all registered sessions.
+
+Sometimes it may happen that an HTTP request includes two cookies of the same
+name. This will usually happen when `sessions.Save` is called twice. To handle
+these situations gracefully, you can use the `GetExact` method to find an exact
+match for your cookie. Please note that the store must implement the StoreExact
+interface for this to work. All default store implementations in this repository
+implement StoreExact.
+
+	var store = sessions.NewCookieStore([]byte("something-very-secret"))
+
+	func MyHandler(w http.ResponseWriter, r *http.Request) {
+		// Get a session and set a value.
+		session1, _ := store.GetExact(r, "session-one", func(s *sessions.Session) {
+			// Only reuse cookies that match "foo" value of "baz".
+			return s.Values["foo"] == "baz"
+		})
+		session1.Values["foo"] = "bar"
+		// Save sessions.
+		err = sessions.Save(r, w)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+	}
 */
 package sessions
