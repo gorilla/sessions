@@ -1,0 +1,40 @@
+name: Go
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  test:
+    name: Build
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        go: [ 'stable', '1.20.x', '1.19.x' ]
+    steps:
+
+    - name: Set up Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: ${{ matrix.go }}
+      id: go
+
+    - uses: actions/checkout@v2
+
+    - name: Print the Go version
+      run: go version
+
+    - name: Run gofmt
+      if: matrix.go == 'stable'
+      run: |
+        diff -u <(echo -n) <(gofmt -d -e .)
+
+    - name: Run go vet
+      if: matrix.go == 'stable'
+      run: |
+        go vet -v ./...
+
+    - name: Run go test (+ race detector)
+      run: go test -v -race ./...
