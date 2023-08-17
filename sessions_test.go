@@ -75,7 +75,6 @@ func TestFlashes(t *testing.T) {
 
 	req, _ = http.NewRequest("GET", "http://localhost:8080/", nil)
 	req.Header.Add("Cookie", cookies[0])
-	rsp = NewRecorder()
 	// Get a session.
 	if session, err = store.Get(req, "session-key"); err != nil {
 		t.Fatalf("Error getting session: %v", err)
@@ -135,7 +134,6 @@ func TestFlashes(t *testing.T) {
 
 	req, _ = http.NewRequest("GET", "http://localhost:8080/", nil)
 	req.Header.Add("Cookie", cookies[0])
-	rsp = NewRecorder()
 	// Get a session.
 	if session, err = store.Get(req, "session-key"); err != nil {
 		t.Fatalf("Error getting session: %v", err)
