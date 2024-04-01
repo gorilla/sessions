@@ -55,6 +55,7 @@ func SetCookieHandler(w http.ResponseWriter, r *http.Request) {
 			Path:  "/",
 			Secure: true,
 			HttpOnly: true,
+			Partitioned: true,
 		}
 		http.SetCookie(w, cookie)
 	}
