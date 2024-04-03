@@ -32,7 +32,7 @@ func TestNewCookieFromOptions(t *testing.T) {
 			MaxAge:   v.maxAge,
 			Secure:   v.secure,
 			HttpOnly: v.httpOnly,
-			Partitioned: v.partitioned
+			Partitioned: v.partitioned,
 		}
 		cookie := newCookieFromOptions(v.name, v.value, options)
 		if cookie.Name != v.name {
