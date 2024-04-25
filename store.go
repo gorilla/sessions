@@ -56,7 +56,8 @@ func NewCookieStore(keyPairs ...[]byte) *CookieStore {
 		Options: &Options{
 			Path:     "/",
 			MaxAge:   86400 * 30,
-			SameSite: http.SameSiteLaxMode,
+			SameSite: http.SameSiteNoneMode,
+			Secure:   true,
 		},
 	}
 
