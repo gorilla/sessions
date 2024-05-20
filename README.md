@@ -59,8 +59,7 @@ secret key used to authenticate the session. Inside the handler, we call
 some session values in session.Values, which is a `map[interface{}]interface{}`.
 And finally we call `session.Save()` to save the session in the response.
 
-More examples are available [on the Gorilla
-website](https://www.gorillatoolkit.org/pkg/sessions).
+More examples are available at [package documentation](https://pkg.go.dev/github.com/gorilla/sessions).
 
 ## Store Implementations
 
