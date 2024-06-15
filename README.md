@@ -1,4 +1,7 @@
-# sessions
+# Gorilla Sessions
+
+> [!CAUTION]
+> The main branch of this respository is in flux and being prepared for the [Go 1.23 release](https://github.com/golang/go/milestone/212). Please use released versions as per the release page.
 
 ![testing](https://github.com/gorilla/sessions/actions/workflows/test.yml/badge.svg)
 [![codecov](https://codecov.io/github/gorilla/sessions/branch/main/graph/badge.svg)](https://codecov.io/github/gorilla/sessions)
