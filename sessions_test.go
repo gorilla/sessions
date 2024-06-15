@@ -9,6 +9,7 @@ import (
 	"encoding/gob"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 )
 
@@ -39,6 +40,10 @@ func TestFlashes(t *testing.T) {
 
 	store := NewCookieStore([]byte("secret-key"))
 
+	if store.Options.SameSite != http.SameSiteNoneMode {
+		t.Fatalf("cookie store error: default same site is not set to None")
+	}
+
 	// Round 1 ----------------------------------------------------------------
 
 	req, _ = http.NewRequest("GET", "http://localhost:8080/", nil)
@@ -65,6 +70,10 @@ func TestFlashes(t *testing.T) {
 	cookies, ok = hdr["Set-Cookie"]
 	if !ok || len(cookies) != 1 {
 		t.Fatal("No cookies. Header:", hdr)
+	}
+
+	if !strings.Contains(cookies[0], "SameSite=None") || !strings.Contains(cookies[0], "Secure") {
+		t.Fatal("Set-Cookie does not contains SameSite=None with Secure, cookie string:", cookies[0])
 	}
 
 	if _, err = store.Get(req, "session:key"); err.Error() != "sessions: invalid character in cookie name: session:key" {

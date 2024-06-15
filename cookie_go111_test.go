@@ -17,6 +17,7 @@ func TestNewCookieFromOptionsSameSite(t *testing.T) {
 		{http.SameSiteDefaultMode},
 		{http.SameSiteLaxMode},
 		{http.SameSiteStrictMode},
+		{http.SameSiteNoneMode},
 	}
 	for i, v := range tests {
 		options := &Options{

@@ -54,8 +54,10 @@ func NewCookieStore(keyPairs ...[]byte) *CookieStore {
 	cs := &CookieStore{
 		Codecs: securecookie.CodecsFromPairs(keyPairs...),
 		Options: &Options{
-			Path:   "/",
-			MaxAge: 86400 * 30,
+			Path:     "/",
+			MaxAge:   86400 * 30,
+			SameSite: http.SameSiteNoneMode,
+			Secure:   true,
 		},
 	}
 
