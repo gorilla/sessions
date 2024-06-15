@@ -1,3 +1,7 @@
+// Copyright 2012 The Gorilla Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 package sessions
 
 import (
@@ -56,8 +60,8 @@ func TestNewCookieFromOptions(t *testing.T) {
 		if cookie.HttpOnly != v.httpOnly {
 			t.Fatalf("%v: bad cookie httpOnly: got %v, want %v", i+1, cookie.HttpOnly, v.httpOnly)
 		}
-		// if cookie.Partitioned != v.partitioned {
-		// 	t.Fatalf("%v: bad cookie partitioned: got %v, want %v", i+1, cookie.Partitioned, v.partitioned)
-		// }
+		if cookie.Partitioned != v.partitioned {
+			t.Fatalf("%v: bad cookie partitioned: got %v, want %v", i+1, cookie.Partitioned, v.partitioned)
+		}
 	}
 }
