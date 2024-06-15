@@ -16,7 +16,6 @@ func newCookieFromOptions(name, value string, options *Options) *http.Cookie {
 		Secure:   options.Secure,
 		HttpOnly: options.HttpOnly,
 		SameSite: options.SameSite,
-		Partitioned: options.Partitioned,
 	}
 
 }

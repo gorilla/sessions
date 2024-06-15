@@ -16,5 +16,4 @@ type Options struct {
 	MaxAge   int
 	Secure   bool
 	HttpOnly bool
-	Partitioned bool
 }

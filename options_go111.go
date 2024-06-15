@@ -18,7 +18,6 @@ type Options struct {
 	MaxAge   int
 	Secure   bool
 	HttpOnly bool
-	Partitioned bool
 	// Defaults to http.SameSiteDefaultMode
 	SameSite http.SameSite
 }
