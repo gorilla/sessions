@@ -79,6 +79,7 @@ Other implementations of the `sessions.Store` interface:
 - [github.com/srinathgs/mysqlstore](https://github.com/srinathgs/mysqlstore) - MySQL
 - [github.com/EnumApps/clustersqlstore](https://github.com/EnumApps/clustersqlstore) - MySQL Cluster
 - [github.com/antonlindstrom/pgstore](https://github.com/antonlindstrom/pgstore) - PostgreSQL
+- [github.com/JensvandeWiel/valkeystore](https://github.com/JensvandeWiel/valkeystore) - Valkey
 - [github.com/boj/redistore](https://github.com/boj/redistore) - Redis
 - [github.com/rbcervilla/redisstore](https://github.com/rbcervilla/redisstore) - Redis (Single, Sentinel, Cluster)
 - [github.com/boj/rethinkstore](https://github.com/boj/rethinkstore) - RethinkDB
