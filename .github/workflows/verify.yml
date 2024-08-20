@@ -12,7 +12,7 @@ jobs:
   lint:
     strategy:
       matrix:
-        go: ['1.20','1.21']
+        go: ['1.23']
       fail-fast: true
     runs-on: ubuntu-latest
     steps:
@@ -28,5 +28,5 @@ jobs:
       - name: Run GolangCI-Lint
         uses: golangci/golangci-lint-action@v3
         with:
-          version: v1.53
+          version: v1.60.1
           args: --timeout=5m
