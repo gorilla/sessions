@@ -1,7 +1,7 @@
 # Gorilla Sessions
 
-> [!CAUTION]
-> The main branch of this respository is in flux and being prepared for the [Go 1.23 release](https://github.com/golang/go/milestone/212). Please use released versions as per the release page.
+> [!IMPORTANT]
+> The latest version of this repository requires go 1.23 because of the new partitioned attribute. The last version that is compatible with older versions of go is v1.3.0.
 
 ![testing](https://github.com/gorilla/sessions/actions/workflows/test.yml/badge.svg)
 [![codecov](https://codecov.io/github/gorilla/sessions/branch/main/graph/badge.svg)](https://codecov.io/github/gorilla/sessions)
