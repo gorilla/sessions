@@ -4,6 +4,8 @@
 
 package sessions
 
+import "net/http"
+
 // Options stores configuration for a session or session store.
 //
 // Fields are a subset of http.Cookie fields.
@@ -14,8 +16,9 @@ type Options struct {
 	// deleted after the browser session ends.
 	// MaxAge<0 means delete cookie immediately.
 	// MaxAge>0 means Max-Age attribute present and given in seconds.
-	MaxAge   int
-	Secure   bool
-	HttpOnly bool
+	MaxAge      int
+	Secure      bool
+	HttpOnly    bool
 	Partitioned bool
+	SameSite    http.SameSite
 }
