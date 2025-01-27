@@ -9,6 +9,7 @@ import (
 	"encoding/gob"
 	"fmt"
 	"net/http"
+	"sync"
 	"time"
 )
 
@@ -124,6 +125,7 @@ func GetRegistry(r *http.Request) *Registry {
 type Registry struct {
 	request  *http.Request
 	sessions map[string]sessionInfo
+	mu       sync.RWMutex // Protects concurrent access to sessions map
 }
 
 // Get registers and returns a session for the given name and session store.
@@ -133,6 +135,10 @@ func (s *Registry) Get(store Store, name string) (session *Session, err error) {
 	if !isCookieNameValid(name) {
 		return nil, fmt.Errorf("sessions: invalid character in cookie name: %s", name)
 	}
+
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
 	if info, ok := s.sessions[name]; ok {
 		session, err = info.s, info.e
 	} else {
@@ -147,6 +153,10 @@ func (s *Registry) Get(store Store, name string) (session *Session, err error) {
 // Save saves all sessions registered for the current request.
 func (s *Registry) Save(w http.ResponseWriter) error {
 	var errMulti MultiError
+
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+
 	for name, info := range s.sessions {
 		session := info.s
 		if session.store == nil {
