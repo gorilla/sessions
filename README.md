@@ -92,6 +92,7 @@ Other implementations of the `sessions.Store` interface:
 - [github.com/GoogleCloudPlatform/firestore-gorilla-sessions](https://github.com/GoogleCloudPlatform/firestore-gorilla-sessions) - Cloud Firestore
 - [github.com/stephenafamo/crdbstore](https://github.com/stephenafamo/crdbstore) - CockroachDB
 - [github.com/ryicoh/tikvstore](github.com/ryicoh/tikvstore) - TiKV
+- [github.com/thecomputerm/surrealstore](https://github.com/TheComputerM/surrealstore) - SurrealDB
 
 ## License
 
