@@ -137,6 +137,12 @@ func (s *Registry) Get(store Store, name string) (session *Session, err error) {
 		session, err = info.s, info.e
 	} else {
 		session, err = store.New(s.request, name)
+		if session == nil {
+			// Some stores return (nil, err) when initialization fails;
+			// surface the error rather than panicking on session.name.
+			s.sessions[name] = sessionInfo{s: nil, e: err}
+			return nil, err
+		}
 		session.name = name
 		s.sessions[name] = sessionInfo{s: session, e: err}
 	}
