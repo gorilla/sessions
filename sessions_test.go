@@ -214,6 +214,49 @@ func TestCookieStoreMapPanic(t *testing.T) {
 	}
 }
 
+// nilSessionStore returns (nil, err) from New, which the registry used
+// to dereference unconditionally and panic on.
+type nilSessionStore struct{}
+
+func (nilSessionStore) Get(_ *http.Request, _ string) (*Session, error) {
+	return nil, errSentinel
+}
+
+func (nilSessionStore) New(_ *http.Request, _ string) (*Session, error) {
+	return nil, errSentinel
+}
+
+func (nilSessionStore) Save(_ *http.Request, _ http.ResponseWriter, _ *Session) error {
+	return errSentinel
+}
+
+var errSentinel = stringError("store unavailable")
+
+type stringError string
+
+func (e stringError) Error() string { return string(e) }
+
+func TestRegistryGetReturnsErrorWhenStoreReturnsNilSession(t *testing.T) {
+	defer func() {
+		if r := recover(); r != nil {
+			t.Fatalf("Registry.Get panicked when store returned nil: %v", r)
+		}
+	}()
+
+	req, err := http.NewRequest("GET", "http://www.example.com", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	reg := GetRegistry(req)
+	sess, err := reg.Get(nilSessionStore{}, "name")
+	if err == nil {
+		t.Fatal("expected error from Registry.Get, got nil")
+	}
+	if sess != nil {
+		t.Fatalf("expected nil session, got %+v", sess)
+	}
+}
+
 func init() {
 	gob.Register(FlashMessage{})
 }
