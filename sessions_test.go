@@ -7,6 +7,7 @@ package sessions
 import (
 	"bytes"
 	"encoding/gob"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -211,6 +212,42 @@ func TestCookieStoreMapPanic(t *testing.T) {
 	err = session.Save(req, w)
 	if err != nil {
 		t.Fatal("failed to save session", err)
+	}
+}
+
+// failingStore is a Store whose New always returns (nil, err). It exists to
+// exercise the nil-session path in Registry.Get without panicking.
+type failingStore struct{}
+
+func (failingStore) Get(*http.Request, string) (*Session, error) {
+	return nil, fmt.Errorf("get not implemented")
+}
+
+func (failingStore) New(*http.Request, string) (*Session, error) {
+	return nil, fmt.Errorf("nope")
+}
+
+func (failingStore) Save(*http.Request, http.ResponseWriter, *Session) error {
+	return nil
+}
+
+func TestRegistry_GetWithFailingStore(t *testing.T) {
+	req, err := http.NewRequest("GET", "http://example.com", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	reg := GetRegistry(req)
+	defer func() {
+		if r := recover(); r != nil {
+			t.Fatalf("Registry.Get panicked: %v", r)
+		}
+	}()
+	s, err := reg.Get(failingStore{}, "session-name")
+	if err == nil {
+		t.Fatal("expected error from failing store, got nil")
+	}
+	if s != nil {
+		t.Fatalf("expected nil session, got %+v", s)
 	}
 }
 
