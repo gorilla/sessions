@@ -52,7 +52,7 @@ func TestNewCookieFromOptions(t *testing.T) {
 			t.Fatalf("%v: bad cookie domain: got %q, want %q", i+1, cookie.Domain, v.domain)
 		}
 		if cookie.MaxAge != v.maxAge {
-			t.Fatalf("%v: bad cookie maxAge: got %q, want %q", i+1, cookie.MaxAge, v.maxAge)
+			t.Fatalf("%v: bad cookie maxAge: got %d, want %d", i+1, cookie.MaxAge, v.maxAge)
 		}
 		if cookie.Secure != v.secure {
 			t.Fatalf("%v: bad cookie secure: got %v, want %v", i+1, cookie.Secure, v.secure)
