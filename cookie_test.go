@@ -5,6 +5,7 @@
 package sessions
 
 import (
+	"net/http"
 	"testing"
 )
 
@@ -19,15 +20,16 @@ func TestNewCookieFromOptions(t *testing.T) {
 		secure      bool
 		httpOnly    bool
 		partitioned bool
+		sameSite    http.SameSite
 	}{
-		{"", "bar", "/foo/bar", "foo.example.com", 3600, true, true, true},
-		{"foo", "", "/foo/bar", "foo.example.com", 3600, true, true, true},
-		{"foo", "bar", "", "foo.example.com", 3600, true, true, true},
-		{"foo", "bar", "/foo/bar", "", 3600, true, true, true},
-		{"foo", "bar", "/foo/bar", "foo.example.com", 0, true, true, true},
-		{"foo", "bar", "/foo/bar", "foo.example.com", 3600, false, true, true},
-		{"foo", "bar", "/foo/bar", "foo.example.com", 3600, true, false, true},
-		{"foo", "bar", "/foo/bar", "foo.example.com", 3600, true, true, false},
+		{"", "bar", "/foo/bar", "foo.example.com", 3600, true, true, true, http.SameSiteDefaultMode},
+		{"foo", "", "/foo/bar", "foo.example.com", 3600, true, true, true, http.SameSiteLaxMode},
+		{"foo", "bar", "", "foo.example.com", 3600, true, true, true, http.SameSiteStrictMode},
+		{"foo", "bar", "/foo/bar", "", 3600, true, true, true, http.SameSiteNoneMode},
+		{"foo", "bar", "/foo/bar", "foo.example.com", 0, true, true, true, http.SameSiteDefaultMode},
+		{"foo", "bar", "/foo/bar", "foo.example.com", 3600, false, true, true, http.SameSiteLaxMode},
+		{"foo", "bar", "/foo/bar", "foo.example.com", 3600, true, false, true, http.SameSiteStrictMode},
+		{"foo", "bar", "/foo/bar", "foo.example.com", 3600, true, true, false, http.SameSiteNoneMode},
 	}
 	for i, v := range tests {
 		options := &Options{
@@ -37,6 +39,7 @@ func TestNewCookieFromOptions(t *testing.T) {
 			Secure:      v.secure,
 			HttpOnly:    v.httpOnly,
 			Partitioned: v.partitioned,
+			SameSite:    v.sameSite,
 		}
 		cookie := newCookieFromOptions(v.name, v.value, options)
 		if cookie.Name != v.name {
@@ -62,6 +65,9 @@ func TestNewCookieFromOptions(t *testing.T) {
 		}
 		if cookie.Partitioned != v.partitioned {
 			t.Fatalf("%v: bad cookie partitioned: got %v, want %v", i+1, cookie.Partitioned, v.partitioned)
+		}
+		if cookie.SameSite != v.sameSite {
+			t.Fatalf("%v: bad cookie sameSite: got %v, want %v", i+1, cookie.SameSite, v.sameSite)
 		}
 	}
 }
