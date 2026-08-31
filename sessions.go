@@ -9,6 +9,7 @@ import (
 	"encoding/gob"
 	"fmt"
 	"net/http"
+	"sync"
 	"time"
 )
 
@@ -105,8 +106,12 @@ type contextKey int
 // registryKey is the key used to store the registry in the context.
 const registryKey contextKey = 0
 
+var registryMu sync.Mutex
+
 // GetRegistry returns a registry instance for the current request.
 func GetRegistry(r *http.Request) *Registry {
+	registryMu.Lock()
+	defer registryMu.Unlock()
 	var ctx = r.Context()
 	registry := ctx.Value(registryKey)
 	if registry != nil {
@@ -122,6 +127,7 @@ func GetRegistry(r *http.Request) *Registry {
 
 // Registry stores sessions used during a request.
 type Registry struct {
+	mu       sync.Mutex
 	request  *http.Request
 	sessions map[string]sessionInfo
 }
@@ -133,6 +139,8 @@ func (s *Registry) Get(store Store, name string) (session *Session, err error) {
 	if !isCookieNameValid(name) {
 		return nil, fmt.Errorf("sessions: invalid character in cookie name: %s", name)
 	}
+	s.mu.Lock()
+	defer s.mu.Unlock()
 	if info, ok := s.sessions[name]; ok {
 		session, err = info.s, info.e
 	} else {
@@ -146,6 +154,8 @@ func (s *Registry) Get(store Store, name string) (session *Session, err error) {
 
 // Save saves all sessions registered for the current request.
 func (s *Registry) Save(w http.ResponseWriter) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
 	var errMulti MultiError
 	for name, info := range s.sessions {
 		session := info.s

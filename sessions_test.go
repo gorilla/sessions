@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"strings"
+	"sync"
 	"testing"
 )
 
@@ -186,6 +187,31 @@ func TestFlashes(t *testing.T) {
 	// Check if the previous inserted value has the same value.
 	if session.Values["test"] != "test-value" {
 		t.Fatalf("Session test value is changed in the request context!")
+	}
+}
+
+func TestRegistryGetConcurrent(t *testing.T) {
+	store := NewCookieStore([]byte("aaa0defe5d2839cbc46fc4f080cd7adc"))
+	req, err := http.NewRequest("GET", "http://www.example.com", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	var wg sync.WaitGroup
+	errCh := make(chan error, 32)
+	for range 32 {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			if _, err := store.Get(req, "sess"); err != nil {
+				errCh <- err
+			}
+		}()
+	}
+	wg.Wait()
+	close(errCh)
+	for err := range errCh {
+		t.Fatal(err)
 	}
 }
 
