@@ -137,8 +137,17 @@ func (s *Registry) Get(store Store, name string) (session *Session, err error) {
 		session, err = info.s, info.e
 	} else {
 		session, err = store.New(s.request, name)
+		if session == nil {
+			if err == nil {
+				err = fmt.Errorf("sessions: store.New returned a nil session for %s", name)
+			}
+			return nil, err
+		}
 		session.name = name
 		s.sessions[name] = sessionInfo{s: session, e: err}
+	}
+	if session == nil {
+		return nil, err
 	}
 	session.store = store
 	return
