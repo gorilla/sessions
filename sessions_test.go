@@ -7,6 +7,7 @@ package sessions
 import (
 	"bytes"
 	"encoding/gob"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -186,6 +187,34 @@ func TestFlashes(t *testing.T) {
 	// Check if the previous inserted value has the same value.
 	if session.Values["test"] != "test-value" {
 		t.Fatalf("Session test value is changed in the request context!")
+	}
+}
+
+type errNilStore struct{}
+
+func (errNilStore) Get(r *http.Request, name string) (*Session, error) {
+	return GetRegistry(r).Get(errNilStore{}, name)
+}
+
+func (errNilStore) New(*http.Request, string) (*Session, error) {
+	return nil, errors.New("store boom")
+}
+
+func (errNilStore) Save(*http.Request, http.ResponseWriter, *Session) error {
+	return nil
+}
+
+func TestRegistryGetNilSessionFromStore(t *testing.T) {
+	req, err := http.NewRequest("GET", "http://localhost/", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	session, err := GetRegistry(req).Get(errNilStore{}, "session-key")
+	if session != nil {
+		t.Fatalf("expected nil session, got %#v", session)
+	}
+	if err == nil || err.Error() != "store boom" {
+		t.Fatalf("expected store boom, got %v", err)
 	}
 }
 
