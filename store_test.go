@@ -131,3 +131,68 @@ func TestGH8FilesystemStoreDelete2(t *testing.T) {
 		t.Fatal("failed to delete session", err)
 	}
 }
+
+func TestCookieStoreErrorReturnsSession(t *testing.T) {
+	store := NewCookieStore([]byte("secret-key"))
+	req, err := http.NewRequest("GET", "http://www.example.com", nil)
+	if err != nil {
+		t.Fatal("failed to create request", err)
+	}
+	req.Header.Set("Cookie", "session-key=corrupted-cookie-value")
+
+	session, err := store.Get(req, "session-key")
+	if err == nil {
+		t.Fatal("expected decode error for corrupted cookie, got nil")
+	}
+	if session == nil {
+		t.Fatal("expected non-nil session when decode fails")
+	}
+	if session.Name() != "session-key" {
+		t.Fatalf("expected session name 'session-key', got %q", session.Name())
+	}
+	if !session.IsNew {
+		t.Fatal("expected session to be marked as new on decode failure")
+	}
+	if session.Values == nil {
+		t.Fatal("expected non-nil Values map")
+	}
+}
+
+func TestCookieStoreNilOptions(t *testing.T) {
+	store := &CookieStore{}
+	req, err := http.NewRequest("GET", "http://www.example.com", nil)
+	if err != nil {
+		t.Fatal("failed to create request", err)
+	}
+
+	session, err := store.New(req, "test")
+	if err != nil {
+		t.Fatalf("expected nil error, got %v", err)
+	}
+	if session == nil {
+		t.Fatal("expected non-nil session")
+	}
+	if !session.IsNew {
+		t.Fatal("expected session to be marked as new")
+	}
+}
+
+func TestFilesystemStoreNilOptions(t *testing.T) {
+	store := &FilesystemStore{path: t.TempDir()}
+	req, err := http.NewRequest("GET", "http://www.example.com", nil)
+	if err != nil {
+		t.Fatal("failed to create request", err)
+	}
+
+	session, err := store.New(req, "test")
+	if err != nil {
+		t.Fatalf("expected nil error, got %v", err)
+	}
+	if session == nil {
+		t.Fatal("expected non-nil session")
+	}
+	if !session.IsNew {
+		t.Fatal("expected session to be marked as new")
+	}
+}
+

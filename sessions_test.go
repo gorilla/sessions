@@ -7,6 +7,7 @@ package sessions
 import (
 	"bytes"
 	"encoding/gob"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -216,4 +217,110 @@ func TestCookieStoreMapPanic(t *testing.T) {
 
 func init() {
 	gob.Register(FlashMessage{})
+}
+
+type errorStore struct {
+	err error
+}
+
+func (s *errorStore) Get(r *http.Request, name string) (*Session, error) {
+	return GetRegistry(r).Get(s, name)
+}
+
+func (s *errorStore) New(r *http.Request, name string) (*Session, error) {
+	return nil, s.err
+}
+
+func (s *errorStore) Save(r *http.Request, w http.ResponseWriter, session *Session) error {
+	return nil
+}
+
+type nilSessionStore struct{}
+
+func (s *nilSessionStore) Get(r *http.Request, name string) (*Session, error) {
+	return GetRegistry(r).Get(s, name)
+}
+
+func (s *nilSessionStore) New(r *http.Request, name string) (*Session, error) {
+	return nil, nil
+}
+
+func (s *nilSessionStore) Save(r *http.Request, w http.ResponseWriter, session *Session) error {
+	return nil
+}
+
+func TestRegistryGetWhenStoreNewReturnsError(t *testing.T) {
+	req, err := http.NewRequest("GET", "http://localhost:8080/", nil)
+	if err != nil {
+		t.Fatalf("failed to create request: %v", err)
+	}
+
+	customErr := errors.New("backend connection failed")
+	store := &errorStore{err: customErr}
+
+	session, err := store.Get(req, "error_session")
+	if err != customErr {
+		t.Fatalf("expected error %v, got %v", customErr, err)
+	}
+	if session == nil {
+		t.Fatal("expected non-nil session when store.New returns an error")
+	}
+	if session.Name() != "error_session" {
+		t.Fatalf("expected session name 'error_session', got %q", session.Name())
+	}
+	if session.Store() != store {
+		t.Fatalf("expected session store %v, got %v", store, session.Store())
+	}
+	if !session.IsNew {
+		t.Fatal("expected session to be marked as new")
+	}
+	if session.Values == nil {
+		t.Fatal("expected session.Values to be initialized")
+	}
+	if session.Options == nil {
+		t.Fatal("expected session.Options to be initialized")
+	}
+
+	session.Values["user"] = "john"
+
+	cachedSession, cachedErr := store.Get(req, "error_session")
+	if cachedErr != customErr {
+		t.Fatalf("expected cached error %v, got %v", customErr, cachedErr)
+	}
+	if cachedSession != session {
+		t.Fatalf("expected cached session %v, got %v", session, cachedSession)
+	}
+
+	rec := httptest.NewRecorder()
+	if err := Save(req, rec); err != nil {
+		t.Fatalf("failed to save registry sessions: %v", err)
+	}
+}
+
+func TestRegistryGetWhenStoreNewReturnsNilSession(t *testing.T) {
+	req, err := http.NewRequest("GET", "http://localhost:8080/", nil)
+	if err != nil {
+		t.Fatalf("failed to create request: %v", err)
+	}
+
+	store := &nilSessionStore{}
+	session, err := store.Get(req, "nil_session")
+	if err != nil {
+		t.Fatalf("expected nil error, got %v", err)
+	}
+	if session == nil {
+		t.Fatal("expected non-nil session when store.New returns nil")
+	}
+	if session.Name() != "nil_session" {
+		t.Fatalf("expected session name 'nil_session', got %q", session.Name())
+	}
+	if session.Store() != store {
+		t.Fatalf("expected session store %v, got %v", store, session.Store())
+	}
+	if !session.IsNew {
+		t.Fatal("expected session to be marked as new")
+	}
+	if session.Values == nil {
+		t.Fatal("expected session.Values to be initialized")
+	}
 }
