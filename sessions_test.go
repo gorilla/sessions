@@ -7,9 +7,11 @@ package sessions
 import (
 	"bytes"
 	"encoding/gob"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"strings"
+	"sync"
 	"testing"
 )
 
@@ -211,6 +213,240 @@ func TestCookieStoreMapPanic(t *testing.T) {
 	err = session.Save(req, w)
 	if err != nil {
 		t.Fatal("failed to save session", err)
+	}
+}
+
+func TestRegistryConcurrentGetSameSession(t *testing.T) {
+	req, err := http.NewRequest("GET", "http://localhost:8080/", nil)
+	if err != nil {
+		t.Fatalf("Failed to create request: %v", err)
+	}
+	registry := GetRegistry(req)
+	store := NewCookieStore([]byte("test-secret-key-1234567890123456"))
+
+	const goroutines = 50
+	var wg sync.WaitGroup
+	sessions := make([]*Session, goroutines)
+	errors := make([]error, goroutines)
+
+	for i := 0; i < goroutines; i++ {
+		wg.Add(1)
+		go func(idx int) {
+			defer wg.Done()
+			sessions[idx], errors[idx] = registry.Get(store, "shared-session")
+		}(i)
+	}
+	wg.Wait()
+
+	for i, err := range errors {
+		if err != nil {
+			t.Fatalf("goroutine %d returned error: %v", i, err)
+		}
+	}
+	for i := 1; i < goroutines; i++ {
+		if sessions[i] != sessions[0] {
+			t.Fatalf("goroutine %d received different session instance than goroutine 0", i)
+		}
+	}
+}
+
+func TestRegistryConcurrentGetDifferentSessions(t *testing.T) {
+	req, err := http.NewRequest("GET", "http://localhost:8080/", nil)
+	if err != nil {
+		t.Fatalf("Failed to create request: %v", err)
+	}
+	registry := GetRegistry(req)
+	store := NewCookieStore([]byte("test-secret-key-1234567890123456"))
+
+	const goroutines = 100
+	var wg sync.WaitGroup
+	sessions := make([]*Session, goroutines)
+	errors := make([]error, goroutines)
+
+	for i := 0; i < goroutines; i++ {
+		wg.Add(1)
+		go func(idx int) {
+			defer wg.Done()
+			name := fmt.Sprintf("session-%d", idx%10)
+			sessions[idx], errors[idx] = registry.Get(store, name)
+		}(i)
+	}
+	wg.Wait()
+
+	for i, err := range errors {
+		if err != nil {
+			t.Fatalf("goroutine %d returned error: %v", i, err)
+		}
+		if sessions[i] == nil {
+			t.Fatalf("goroutine %d received nil session", i)
+		}
+	}
+
+	for i := 0; i < goroutines; i++ {
+		for j := i + 1; j < goroutines; j++ {
+			if i%10 == j%10 && sessions[i] != sessions[j] {
+				t.Fatalf("sessions with identical name should share pointer instance")
+			}
+		}
+	}
+}
+
+func TestRegistryConcurrentGetAndSave(t *testing.T) {
+	req, err := http.NewRequest("GET", "http://localhost:8080/", nil)
+	if err != nil {
+		t.Fatalf("Failed to create request: %v", err)
+	}
+	registry := GetRegistry(req)
+	store := NewCookieStore([]byte("test-secret-key-1234567890123456"))
+
+	const numGetters = 40
+	const numSavers = 20
+	var wg sync.WaitGroup
+
+	for i := 0; i < numGetters; i++ {
+		wg.Add(1)
+		go func(idx int) {
+			defer wg.Done()
+			name := fmt.Sprintf("concurrent-session-%d", idx%5)
+			sess, err := registry.Get(store, name)
+			if err != nil {
+				t.Errorf("Get failed: %v", err)
+			}
+			if sess == nil {
+				t.Errorf("Get returned nil session")
+			}
+		}(i)
+	}
+
+	for i := 0; i < numSavers; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			w := httptest.NewRecorder()
+			if err := registry.Save(w); err != nil {
+				t.Errorf("Save failed: %v", err)
+			}
+		}()
+	}
+
+	wg.Wait()
+}
+
+func TestRegistryConcurrentSave(t *testing.T) {
+	req, err := http.NewRequest("GET", "http://localhost:8080/", nil)
+	if err != nil {
+		t.Fatalf("Failed to create request: %v", err)
+	}
+	registry := GetRegistry(req)
+	store := NewCookieStore([]byte("test-secret-key-1234567890123456"))
+
+	for i := 0; i < 5; i++ {
+		name := fmt.Sprintf("session-%d", i)
+		s, err := registry.Get(store, name)
+		if err != nil {
+			t.Fatalf("Get failed: %v", err)
+		}
+		s.Values["key"] = i
+	}
+
+	const goroutines = 30
+	var wg sync.WaitGroup
+	for i := 0; i < goroutines; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			w := httptest.NewRecorder()
+			if err := registry.Save(w); err != nil {
+				t.Errorf("Save failed: %v", err)
+			}
+		}()
+	}
+	wg.Wait()
+}
+
+func TestStoreConcurrentGet(t *testing.T) {
+	req, err := http.NewRequest("GET", "http://localhost:8080/", nil)
+	if err != nil {
+		t.Fatalf("Failed to create request: %v", err)
+	}
+	store := NewCookieStore([]byte("test-secret-key-1234567890123456"))
+
+	// Pre-populate registry context so goroutines query the shared registry
+	_ = GetRegistry(req)
+
+	const goroutines = 50
+	var wg sync.WaitGroup
+	sessions := make([]*Session, goroutines)
+	errors := make([]error, goroutines)
+
+	for i := 0; i < goroutines; i++ {
+		wg.Add(1)
+		go func(idx int) {
+			defer wg.Done()
+			sessions[idx], errors[idx] = store.Get(req, "user-session")
+		}(i)
+	}
+	wg.Wait()
+
+	for i, err := range errors {
+		if err != nil {
+			t.Fatalf("goroutine %d failed: %v", i, err)
+		}
+		if sessions[i] == nil {
+			t.Fatalf("goroutine %d session is nil", i)
+		}
+	}
+	for i := 1; i < goroutines; i++ {
+		if sessions[i] != sessions[0] {
+			t.Fatalf("goroutine %d received different session instance than goroutine 0", i)
+		}
+	}
+}
+
+func TestRegistrySaveMissingStore(t *testing.T) {
+	req, err := http.NewRequest("GET", "http://localhost:8080/", nil)
+	if err != nil {
+		t.Fatalf("Failed to create request: %v", err)
+	}
+	registry := &Registry{
+		request:  req,
+		sessions: make(map[string]sessionInfo),
+	}
+	registry.sessions["orphan"] = sessionInfo{
+		s: &Session{name: "orphan", store: nil},
+		e: nil,
+	}
+
+	w := httptest.NewRecorder()
+	err = registry.Save(w)
+	if err == nil {
+		t.Fatal("expected error for missing store, got nil")
+	}
+	if !strings.Contains(err.Error(), "missing store for session \"orphan\"") {
+		t.Fatalf("unexpected error message: %v", err)
+	}
+}
+
+func TestRegistryUninitializedMap(t *testing.T) {
+	req, err := http.NewRequest("GET", "http://localhost:8080/", nil)
+	if err != nil {
+		t.Fatalf("Failed to create request: %v", err)
+	}
+	registry := &Registry{request: req}
+	store := NewCookieStore([]byte("test-secret-key-1234567890123456"))
+
+	sess, err := registry.Get(store, "lazy-init")
+	if err != nil {
+		t.Fatalf("Get failed on uninitialized map: %v", err)
+	}
+	if sess == nil {
+		t.Fatal("expected session instance, got nil")
+	}
+
+	w := httptest.NewRecorder()
+	emptyReg := &Registry{request: req}
+	if err := emptyReg.Save(w); err != nil {
+		t.Fatalf("Save failed on uninitialized map: %v", err)
 	}
 }
 

@@ -9,6 +9,7 @@ import (
 	"encoding/gob"
 	"fmt"
 	"net/http"
+	"sync"
 	"time"
 )
 
@@ -124,6 +125,7 @@ func GetRegistry(r *http.Request) *Registry {
 type Registry struct {
 	request  *http.Request
 	sessions map[string]sessionInfo
+	mu       sync.RWMutex
 }
 
 // Get registers and returns a session for the given name and session store.
@@ -133,28 +135,50 @@ func (s *Registry) Get(store Store, name string) (session *Session, err error) {
 	if !isCookieNameValid(name) {
 		return nil, fmt.Errorf("sessions: invalid character in cookie name: %s", name)
 	}
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	if s.sessions == nil {
+		s.sessions = make(map[string]sessionInfo)
+	}
 	if info, ok := s.sessions[name]; ok {
 		session, err = info.s, info.e
 	} else {
 		session, err = store.New(s.request, name)
-		session.name = name
+		if session != nil {
+			session.name = name
+		}
 		s.sessions[name] = sessionInfo{s: session, e: err}
 	}
-	session.store = store
+	if session != nil {
+		session.store = store
+	}
 	return
 }
 
 // Save saves all sessions registered for the current request.
 func (s *Registry) Save(w http.ResponseWriter) error {
 	var errMulti MultiError
+
+	s.mu.RLock()
+	type sessionItem struct {
+		name string
+		s    *Session
+	}
+	sessions := make([]sessionItem, 0, len(s.sessions))
 	for name, info := range s.sessions {
-		session := info.s
-		if session.store == nil {
+		sessions = append(sessions, sessionItem{name: name, s: info.s})
+	}
+	s.mu.RUnlock()
+
+	for _, item := range sessions {
+		session := item.s
+		if session == nil || session.store == nil {
 			errMulti = append(errMulti, fmt.Errorf(
-				"sessions: missing store for session %q", name))
+				"sessions: missing store for session %q", item.name))
 		} else if err := session.store.Save(s.request, w, session); err != nil {
 			errMulti = append(errMulti, fmt.Errorf(
-				"sessions: error saving session %q -- %v", name, err))
+				"sessions: error saving session %q -- %v", item.name, err))
 		}
 	}
 	if errMulti != nil {
