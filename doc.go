@@ -177,7 +177,7 @@ New sessions will be saved using the first pair. Old sessions can still be
 read because the first pair will fail, and the second will be tested. This
 makes it easy to "rotate" secret keys and still be able to validate existing
 sessions. Note: for all pairs the encryption key is optional; set it to nil
-or omit it and and encryption won't be used.
+or omit it and encryption won't be used.
 
 Multiple sessions can be used in the same request, even with different
 session backends. When this happens, calling Save() on each session
